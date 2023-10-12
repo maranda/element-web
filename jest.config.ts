@@ -43,6 +43,7 @@ const config: Config = {
         "workers/(.+)\\.worker\\.ts": "<rootDir>/node_modules/matrix-react-sdk/__mocks__/workerMock.js",
         "^!!raw-loader!.*": "jest-raw-loader",
         "RecorderWorklet": "<rootDir>/node_modules/matrix-react-sdk/__mocks__/empty.js",
+        "^fetch-mock$": "<rootDir>/node_modules/fetch-mock",
     },
     transformIgnorePatterns: ["/node_modules/(?!matrix-js-sdk).+$", "/node_modules/(?!matrix-react-sdk).+$"],
     coverageReporters: ["text-summary", "lcov"],

@@ -12,7 +12,7 @@
         "outDir": "./lib",
         "declaration": true,
         "jsx": "react",
-        "lib": ["es2020", "dom", "dom.iterable"],
+        "lib": ["es2021", "dom", "dom.iterable"],
         "strict": true
     },
     "include": [
@@ -24,6 +24,10 @@
         "./src/**/*.ts",
         "./src/**/*.tsx",
         "./test/**/*.ts",
-        "./test/**/*.tsx"
-    ]
+        "./test/**/*.tsx",
+        "./scripts/*.ts"
+    ],
+    "ts-node": {
+        "files": true
+    }
 }
