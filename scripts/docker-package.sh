@@ -3,7 +3,7 @@
 set -ex
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-DIST_VERSION=v1.11.43 # git describe just breaks in Alpine
+DIST_VERSION=v1.11.46 # git describe just breaks in Alpine
 
 DIR=$(dirname "$0")
 
