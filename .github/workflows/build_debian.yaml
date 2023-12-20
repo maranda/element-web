@@ -17,8 +17,8 @@ jobs:
 
             - name: Download package
               run: |
-                  wget "https://github.com/vector-im/element-web/releases/download/$VERSION/element-$VERSION.tar.gz"
-                  wget "https://github.com/vector-im/element-web/releases/download/$VERSION/element-$VERSION.tar.gz.asc"
+                  wget "https://github.com/element-hq/element-web/releases/download/$VERSION/element-$VERSION.tar.gz"
+                  wget "https://github.com/element-hq/element-web/releases/download/$VERSION/element-$VERSION.tar.gz.asc"
 
             - name: Check GPG signature
               run: |
@@ -33,10 +33,11 @@ jobs:
               run: |
                   mkdir -p debian/tmp/DEBIAN
                   find debian -maxdepth 1 -type f -exec cp "{}" debian/tmp/DEBIAN/ \;
-                  mkdir -p debian/tmp/usr/share/element-web/
+                  mkdir -p debian/tmp/usr/share/element-web/ debian/tmp/etc/element-web/
 
                   tar -xf "element-$VERSION.tar.gz" -C debian/tmp/usr/share/element-web --strip-components=1 --no-same-owner --no-same-permissions
-                  mv debian/tmp/usr/share/element-web/config{.sample,}.json
+                  mv debian/tmp/usr/share/element-web/config.sample.json debian/tmp/etc/element-web/config.json
+                  ln -s /etc/element-web/config.json debian/tmp/usr/share/element-web/config.json
 
             - name: Write changelog
               run: |
@@ -68,7 +69,7 @@ jobs:
 
             - name: Publish to packages.element.io
               if: github.event.release.prerelease == false
-              uses: vector-im/packages.element.io@master
+              uses: element-hq/packages.element.io@master
               with:
                   file: element-web.deb
                   github-token: ${{ secrets.ELEMENT_BOT_TOKEN }}

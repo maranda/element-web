@@ -37,29 +37,6 @@ date from the calendar.
 
 Also adds the `/jumptodate 2022-01-31` slash command.
 
-## Render simple counters in room header (`feature_state_counters`)
-
-Allows rendering of labelled counters above the message list.
-
-Once enabled, send a custom state event to a room to set values:
-
-1. In a room, type `/devtools` to bring up the devtools interface
-2. Click "Send Custom Event"
-3. Toggle from "Event" to "State Event"
-4. Set the event type to: `re.jki.counter` and give it a unique key
-5. Specify the content in the following format:
-
-```
-{
-    "link": "",
-    "severity": "normal",
-    "title": "my counter",
-    "value": 0
-}
-```
-
-That's it. Now should see your new counter under the header.
-
 ## New ways to ignore people (`feature_mjolnir`)
 
 When enabled, a new settings tab appears for users to be able to manage their ban lists.
@@ -119,6 +96,15 @@ This flag will not have any effect unless `feature_video_rooms` is also enabled.
 This feature allows users to place and join native [MSC3401](https://github.com/matrix-org/matrix-spec-proposals/pull/3401) group calls in compatible rooms, using Element Call.
 
 If you're enabling this at the deployment level, you may also want to reference the docs for the `element_call` config section.
+
+## Disable per-sender encryption for Element Call (`feature_disable_call_per_sender_encryption`)
+
+The default for embedded Element Call in Element Web is per-participant encryption.
+This labs flag disables encryption for embedded Element Call in encrypted rooms.
+
+Under the hood this stops Element Web from adding the `perParticipantE2EE` flag for the Element Call widget url.
+
+This is useful while we experiment with encryption and to make calling compatible with platforms that don't use encryption yet.
 
 ## Rich text in room topics (`feature_html_topic`) [In Development]
 
