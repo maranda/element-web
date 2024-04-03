@@ -3,6 +3,8 @@ on:
     pull_request: {}
     push:
         branches: [develop, master]
+    merge_group:
+        types: [checks_requested]
     repository_dispatch:
         types: [element-web-notify]
 env:
@@ -29,6 +31,8 @@ jobs:
     i18n_lint:
         name: "i18n Check"
         uses: matrix-org/matrix-web-i18n/.github/workflows/i18n_check.yml@main
+        with:
+            hardcoded-words: "Element"
 
     js_lint:
         name: "ESLint"

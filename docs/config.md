@@ -137,7 +137,7 @@ complete re-branding/private labeling, a more personalised experience can be ach
    This setting is ignored if your homeserver provides `/.well-known/matrix/client` in its well-known location, and the JSON file
    at that location has a key `m.tile_server` (or the unstable version `org.matrix.msc3488.tile_server`). In this case, the
    configuration found in the well-known location is used instead.
-10. `welcome_user_id`: An optional user ID to start a DM with after creating an account. Defaults to nothing (no DM created).
+10. `welcome_user_id`: **DEPRECATED** An optional user ID to start a DM with after creating an account. Defaults to nothing (no DM created).
 11. `custom_translations_url`: An optional URL to allow overriding of translatable strings. The JSON file must be in a format of
     `{"affected|translation|key": {"languageCode": "new string"}}`. See https://github.com/matrix-org/matrix-react-sdk/pull/7886 for details.
 12. `branding`: Options for configuring various assets used within the app. Described in more detail down below.
@@ -344,6 +344,12 @@ The VoIP and Jitsi options are:
       this number is exceeded, the user will not be able to join a given call.
     - `brand`: Optional name for the app. Defaults to `Element Call`. This is
       used throughout the application in various strings/locations.
+    - `guest_spa_url`: Optional URL for an Element Call single-page app (SPA),
+      for guest links. If this is set, Element Web will expose a "join" link
+      for public video rooms, which can then be shared to non-matrix users.
+      The target Element Call SPA is typically set up to use a homeserver that
+      allows users to register without email ("passwordless guest users") and to
+      federate.
 
 ## Bug reporting
 
@@ -480,7 +486,7 @@ decentralised.
 
 ## Desktop app configuration
 
-See https://github.com/vector-im/element-desktop#user-specified-configjson
+See https://github.com/element-hq/element-desktop#user-specified-configjson
 
 ## UI Features
 
