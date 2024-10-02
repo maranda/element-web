@@ -1,17 +1,8 @@
 /*
-Copyright 2024 New Vector Ltd
+Copyright 2024 New Vector Ltd.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
 */
 
 import { idbLoad } from "matrix-react-sdk/src/utils/StorageAccess";
@@ -20,18 +11,18 @@ import { buildAndEncodePickleKey } from "matrix-react-sdk/src/utils/tokens/pickl
 
 const serverSupportMap: {
     [serverUrl: string]: {
-        supportsMSC3916: boolean;
+        supportsAuthedMedia: boolean;
         cacheExpiryTimeMs: number;
     };
 } = {};
 
-self.addEventListener("install", (event) => {
+global.addEventListener("install", (event) => {
     // We skipWaiting() to update the service worker more frequently, particularly in development environments.
     // @ts-expect-error - service worker types are not available. See 'fetch' event handler.
     event.waitUntil(skipWaiting());
 });
 
-self.addEventListener("activate", (event) => {
+global.addEventListener("activate", (event) => {
     // We force all clients to be under our control, immediately. This could be old tabs.
     // @ts-expect-error - service worker types are not available. See 'fetch' event handler.
     event.waitUntil(clients.claim());
@@ -40,7 +31,7 @@ self.addEventListener("activate", (event) => {
 // @ts-expect-error - the service worker types conflict with the DOM types available through TypeScript. Many hours
 // have been spent trying to convince the type system that there's no actual conflict, but it has yet to work. Instead
 // of trying to make it do the thing, we force-cast to something close enough where we can (and ignore errors otherwise).
-self.addEventListener("fetch", (event: FetchEvent) => {
+global.addEventListener("fetch", (event: FetchEvent) => {
     // This is the authenticated media (MSC3916) check, proxying what was unauthenticated to the authenticated variants.
 
     if (event.request.method !== "GET") {
@@ -72,17 +63,15 @@ self.addEventListener("fetch", (event: FetchEvent) => {
 
                 // Locate our access token, and populate the fetchConfig with the authentication header.
                 // @ts-expect-error - service worker types are not available. See 'fetch' event handler.
-                const client = await self.clients.get(event.clientId);
+                const client = await global.clients.get(event.clientId);
                 accessToken = await getAccessToken(client);
 
                 // Update or populate the server support map using a (usually) authenticated `/versions` call.
                 await tryUpdateServerSupportMap(csApi, accessToken);
 
                 // If we have server support (and a means of authentication), rewrite the URL to use MSC3916 endpoints.
-                if (serverSupportMap[csApi].supportsMSC3916 && accessToken) {
-                    // Currently unstable only.
-                    // TODO: Support stable endpoints when available.
-                    url = url.replace(/\/media\/v3\/(.*)\//, "/client/unstable/org.matrix.msc3916/media/$1/");
+                if (serverSupportMap[csApi].supportsAuthedMedia && accessToken) {
+                    url = url.replace(/\/media\/v3\/(.*)\//, "/client/v1/media/$1/");
                 } // else by default we make no changes
             } catch (err) {
                 console.error("SW: Error in request rewrite.", err);
@@ -104,11 +93,15 @@ async function tryUpdateServerSupportMap(clientApiUrl: string, accessToken?: str
 
     const config = fetchConfigForToken(accessToken);
     const versions = await (await fetch(`${clientApiUrl}/_matrix/client/versions`, config)).json();
+    console.log(`[ServiceWorker] /versions response for '${clientApiUrl}': ${JSON.stringify(versions)}`);
 
     serverSupportMap[clientApiUrl] = {
-        supportsMSC3916: Boolean(versions?.unstable_features?.["org.matrix.msc3916"]),
+        supportsAuthedMedia: Boolean(versions?.versions?.includes("v1.11")),
         cacheExpiryTimeMs: new Date().getTime() + 2 * 60 * 60 * 1000, // 2 hours from now
     };
+    console.log(
+        `[ServiceWorker] serverSupportMap update for '${clientApiUrl}': ${JSON.stringify(serverSupportMap[clientApiUrl])}`,
+    );
 }
 
 // Ideally we'd use the `Client` interface for `client`, but since it's not available (see 'fetch' listener), we use
@@ -164,9 +157,9 @@ async function askClientForUserIdParams(client: unknown): Promise<{ userId: stri
             if (event.data?.responseKey !== responseKey) return; // not for us
             clearTimeout(timeoutId); // do this as soon as possible, avoiding a race between resolve and reject.
             resolve(event.data); // "unblock" the remainder of the thread, if that were such a thing in JavaScript.
-            self.removeEventListener("message", listener); // cleanup, since we're not going to do anything else.
+            global.removeEventListener("message", listener); // cleanup, since we're not going to do anything else.
         };
-        self.addEventListener("message", listener);
+        global.addEventListener("message", listener);
 
         // Ask the tab for the information we need. This is handled by WebPlatform.
         (client as Window).postMessage({ responseKey, type: "userinfo" });
