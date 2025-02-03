@@ -1,3 +1,230 @@
+Changes in [1.11.91](https://github.com/element-hq/element-web/releases/tag/v1.11.91) (2025-01-28)
+==================================================================================================
+## ✨ Features
+
+* Implement changes to memberlist from feedback ([#29029](https://github.com/element-hq/element-web/pull/29029)). Contributed by @MidhunSureshR.
+* Add toast for recovery keys being out of sync ([#28946](https://github.com/element-hq/element-web/pull/28946)). Contributed by @dbkr.
+* Refactor LegacyCallHandler event emitter to use TypedEventEmitter ([#29008](https://github.com/element-hq/element-web/pull/29008)). Contributed by @t3chguy.
+* Add `Recovery` section in the new user settings `Encryption` tab ([#28673](https://github.com/element-hq/element-web/pull/28673)). Contributed by @florianduros.
+* Retry loading chunks to make the app more resilient ([#29001](https://github.com/element-hq/element-web/pull/29001)). Contributed by @t3chguy.
+* Clear account idb table on logout ([#28996](https://github.com/element-hq/element-web/pull/28996)). Contributed by @t3chguy.
+* Implement new memberlist design with MVVM architecture  ([#28874](https://github.com/element-hq/element-web/pull/28874)). Contributed by @MidhunSureshR.
+
+## 🐛 Bug Fixes
+
+* [Backport staging] Switch to secure random strings ([#29035](https://github.com/element-hq/element-web/pull/29035)). Contributed by @RiotRobot.
+* React to MatrixEvent sender/target being updated for rendering state events ([#28947](https://github.com/element-hq/element-web/pull/28947)). Contributed by @t3chguy.
+
+
+Changes in [1.11.90](https://github.com/element-hq/element-web/releases/tag/v1.11.90) (2025-01-14)
+==================================================================================================
+## ✨ Features
+
+* Docker: run as non-root ([#28849](https://github.com/element-hq/element-web/pull/28849)). Contributed by @richvdh.
+* Docker: allow configuration of HTTP listen port via env var ([#28840](https://github.com/element-hq/element-web/pull/28840)). Contributed by @richvdh.
+* Update matrix-wysiwyg to consume WASM asset ([#28838](https://github.com/element-hq/element-web/pull/28838)). Contributed by @t3chguy.
+* OIDC settings tweaks ([#28787](https://github.com/element-hq/element-web/pull/28787)). Contributed by @t3chguy.
+* Delabs native OIDC support ([#28615](https://github.com/element-hq/element-web/pull/28615)). Contributed by @t3chguy.
+* Move room header info button to right-most position ([#28754](https://github.com/element-hq/element-web/pull/28754)). Contributed by @t3chguy.
+* Enable key backup by default ([#28691](https://github.com/element-hq/element-web/pull/28691)). Contributed by @dbkr.
+
+## 🐛 Bug Fixes
+
+* Fix building the automations mermaid diagram ([#28881](https://github.com/element-hq/element-web/pull/28881)). Contributed by @dbkr.
+* Playwright: wait for the network listener on the postgres db ([#28808](https://github.com/element-hq/element-web/pull/28808)). Contributed by @dbkr.
+
+
+Changes in [1.11.89](https://github.com/element-hq/element-web/releases/tag/v1.11.89) (2024-12-18)
+==================================================================================================
+This is a patch release to fix a bug which could prevent loading stored crypto state from storage, and also to fix URL previews when switching back to a room.
+
+## 🐛 Bug Fixes
+
+* Upgrade matrix-sdk-crypto-wasm to 1.11.0 (https://github.com/matrix-org/matrix-js-sdk/pull/4593)
+* Fix url preview display ([#28766](https://github.com/element-hq/element-web/pull/28766)).
+
+
+Changes in [1.11.88](https://github.com/element-hq/element-web/releases/tag/v1.11.88) (2024-12-17)
+==================================================================================================
+## ✨ Features
+
+* Allow trusted Element Call widget to send and receive media encryption key to-device messages ([#28316](https://github.com/element-hq/element-web/pull/28316)). Contributed by @hughns.
+* increase ringing timeout from 10 seconds to 90 seconds ([#28630](https://github.com/element-hq/element-web/pull/28630)). Contributed by @fkwp.
+* Add `Close` tooltip to dialog ([#28617](https://github.com/element-hq/element-web/pull/28617)). Contributed by @florianduros.
+* New UX for Share dialog ([#28598](https://github.com/element-hq/element-web/pull/28598)). Contributed by @florianduros.
+* Improve performance of RoomContext in RoomHeader ([#28574](https://github.com/element-hq/element-web/pull/28574)). Contributed by @t3chguy.
+* Remove `Features.RustCrypto` flag ([#28582](https://github.com/element-hq/element-web/pull/28582)). Contributed by @florianduros.
+* Add Modernizr warning when running in non-secure context ([#28581](https://github.com/element-hq/element-web/pull/28581)). Contributed by @t3chguy.
+
+## 🐛 Bug Fixes
+
+* Fix jumpy timeline when the pinned message banner is displayed ([#28654](https://github.com/element-hq/element-web/pull/28654)). Contributed by @florianduros.
+* Fix font \& spaces in settings subsection ([#28631](https://github.com/element-hq/element-web/pull/28631)). Contributed by @florianduros.
+* Remove manual device verification which is not supported by the new cryptography stack ([#28588](https://github.com/element-hq/element-web/pull/28588)). Contributed by @florianduros.
+* Fix code block highlighting not working reliably with many code blocks ([#28613](https://github.com/element-hq/element-web/pull/28613)). Contributed by @t3chguy.
+* Remove remaining reply fallbacks code ([#28610](https://github.com/element-hq/element-web/pull/28610)). Contributed by @t3chguy.
+* Provide a way to activate GIFs via the keyboard for a11y ([#28611](https://github.com/element-hq/element-web/pull/28611)). Contributed by @t3chguy.
+* Fix format bar position ([#28591](https://github.com/element-hq/element-web/pull/28591)). Contributed by @florianduros.
+* Fix room taking long time to load ([#28579](https://github.com/element-hq/element-web/pull/28579)). Contributed by @florianduros.
+* Show the correct shield status in tooltip for more conditions ([#28476](https://github.com/element-hq/element-web/pull/28476)). Contributed by @uhoreg.
+
+
+Changes in [1.11.87](https://github.com/element-hq/element-web/releases/tag/v1.11.87) (2024-12-03)
+==================================================================================================
+## ✨ Features
+
+* Send and respect MSC4230 is\_animated flag ([#28513](https://github.com/element-hq/element-web/pull/28513)). Contributed by @t3chguy.
+* Display a warning when an unverified user's identity changes ([#28211](https://github.com/element-hq/element-web/pull/28211)). Contributed by @uhoreg.
+* Swap out Twitter link for Mastodon on auth footer ([#28508](https://github.com/element-hq/element-web/pull/28508)). Contributed by @t3chguy.
+* Consider `org.matrix.msc3417.call` as video room in create room dialog ([#28497](https://github.com/element-hq/element-web/pull/28497)). Contributed by @t3chguy.
+* Standardise icons using Compound Design Tokens ([#28217](https://github.com/element-hq/element-web/pull/28217)). Contributed by @t3chguy.
+* Start sending stable `m.marked_unread` events ([#28478](https://github.com/element-hq/element-web/pull/28478)). Contributed by @tulir.
+* Upgrade to compound-design-tokens v2 ([#28471](https://github.com/element-hq/element-web/pull/28471)). Contributed by @t3chguy.
+* Standardise icons using Compound Design Tokens ([#28286](https://github.com/element-hq/element-web/pull/28286)). Contributed by @t3chguy.
+* Remove reply fallbacks as per merged MSC2781 ([#28406](https://github.com/element-hq/element-web/pull/28406)). Contributed by @t3chguy.
+* Use React Suspense when rendering async modals ([#28386](https://github.com/element-hq/element-web/pull/28386)). Contributed by @t3chguy.
+
+## 🐛 Bug Fixes
+
+* Add spinner when room encryption is loading in room settings ([#28535](https://github.com/element-hq/element-web/pull/28535)). Contributed by @florianduros.
+* Fix getOidcCallbackUrl for Element Desktop ([#28521](https://github.com/element-hq/element-web/pull/28521)). Contributed by @t3chguy.
+* Filter out redacted poll votes to avoid crashing the Poll widget ([#28498](https://github.com/element-hq/element-web/pull/28498)). Contributed by @t3chguy.
+* Fix force tab complete not working since switching to React 18 createRoot API ([#28505](https://github.com/element-hq/element-web/pull/28505)). Contributed by @t3chguy.
+* Fix media captions in bubble layout ([#28480](https://github.com/element-hq/element-web/pull/28480)). Contributed by @tulir.
+* Reset cross-signing before backup when resetting both ([#28402](https://github.com/element-hq/element-web/pull/28402)). Contributed by @uhoreg.
+* Listen to events so that encryption icon updates when status changes ([#28407](https://github.com/element-hq/element-web/pull/28407)). Contributed by @uhoreg.
+* Check that the file the user chose has a MIME type of `image/*` ([#28467](https://github.com/element-hq/element-web/pull/28467)). Contributed by @t3chguy.
+* Fix download button size in message action bar ([#28472](https://github.com/element-hq/element-web/pull/28472)). Contributed by @t3chguy.
+* Allow tab completing users in brackets ([#28460](https://github.com/element-hq/element-web/pull/28460)). Contributed by @t3chguy.
+* Fix React 18 strict mode breaking spotlight dialog ([#28452](https://github.com/element-hq/element-web/pull/28452)). Contributed by @MidhunSureshR.
+
+
+Changes in [1.11.86](https://github.com/element-hq/element-web/releases/tag/v1.11.86) (2024-11-19)
+==================================================================================================
+## ✨ Features
+
+* Deduplicate icons using Compound Design Tokens ([#28419](https://github.com/element-hq/element-web/pull/28419)). Contributed by @t3chguy.
+* Let widget driver send error details ([#28357](https://github.com/element-hq/element-web/pull/28357)). Contributed by @AndrewFerr.
+* Deduplicate icons using Compound Design Tokens ([#28381](https://github.com/element-hq/element-web/pull/28381)). Contributed by @t3chguy.
+* Auto approvoce `io.element.call.reaction` capability for element call widgets ([#28401](https://github.com/element-hq/element-web/pull/28401)). Contributed by @toger5.
+* Show message type prefix in thread root \& reply previews ([#28361](https://github.com/element-hq/element-web/pull/28361)). Contributed by @t3chguy.
+* Support sending encrypted to device messages from widgets ([#28315](https://github.com/element-hq/element-web/pull/28315)). Contributed by @hughns.
+
+## 🐛 Bug Fixes
+
+* Feed events to widgets as they are decrypted (even if out of order) ([#28376](https://github.com/element-hq/element-web/pull/28376)). Contributed by @robintown.
+* Handle authenticated media when downloading from ImageView ([#28379](https://github.com/element-hq/element-web/pull/28379)). Contributed by @t3chguy.
+* Ignore `m.3pid_changes` for Identity service 3PID changes ([#28375](https://github.com/element-hq/element-web/pull/28375)). Contributed by @t3chguy.
+* Fix markdown escaping wrongly passing html through ([#28363](https://github.com/element-hq/element-web/pull/28363)). Contributed by @t3chguy.
+* Remove "Upgrade your encryption" flow in `CreateSecretStorageDialog` ([#28290](https://github.com/element-hq/element-web/pull/28290)). Contributed by @florianduros.
+
+
+Changes in [1.11.85](https://github.com/element-hq/element-web/releases/tag/v1.11.85) (2024-11-12)
+==================================================================================================
+# Security
+- Fixes for [CVE-2024-51750](https://www.cve.org/CVERecord?id=CVE-2024-51750) / [GHSA-w36j-v56h-q9pc](https://github.com/element-hq/element-web/security/advisories/GHSA-w36j-v56h-q9pc)
+- Fixes for [CVE-2024-51749](https://www.cve.org/CVERecord?id=CVE-2024-51749) / [GHSA-5486-384g-mcx2](https://github.com/element-hq/element-web/security/advisories/GHSA-5486-384g-mcx2)
+- Update JS SDK with the fixes for [CVE-2024-50336](https://www.cve.org/CVERecord?id=CVE-2024-50336) / [GHSA-xvg8-m4x3-w6xr](https://github.com/matrix-org/matrix-js-sdk/security/advisories/GHSA-xvg8-m4x3-w6xr)
+
+
+Changes in [1.11.84](https://github.com/element-hq/element-web/releases/tag/v1.11.84) (2024-11-05)
+==================================================================================================
+## ✨ Features
+
+* Remove abandoned MSC3886, MSC3903, MSC3906 implementations ([#28274](https://github.com/element-hq/element-web/pull/28274)). Contributed by @t3chguy.
+* Update to React 18 ([#24763](https://github.com/element-hq/element-web/pull/24763)). Contributed by @t3chguy.
+* Deduplicate icons using Compound ([#28239](https://github.com/element-hq/element-web/pull/28239)). Contributed by @t3chguy.
+* Replace legacy Tooltips with Compound tooltips ([#28231](https://github.com/element-hq/element-web/pull/28231)). Contributed by @t3chguy.
+* Deduplicate icons using Compound Design Tokens ([#28219](https://github.com/element-hq/element-web/pull/28219)). Contributed by @t3chguy.
+* Add reactions to html export ([#28210](https://github.com/element-hq/element-web/pull/28210)). Contributed by @langleyd.
+* Remove feature\_dehydration ([#28173](https://github.com/element-hq/element-web/pull/28173)). Contributed by @florianduros.
+
+## 🐛 Bug Fixes
+
+* Remove upgrade encryption in `DeviceListener` and `SetupEncryptionToast` ([#28299](https://github.com/element-hq/element-web/pull/28299)). Contributed by @florianduros.
+* Fix 'remove alias' button in room settings ([#28269](https://github.com/element-hq/element-web/pull/28269)). Contributed by @Dev-Gurjar.
+* Add back unencrypted path in `StopGapWidgetDriver.sendToDevice` ([#28295](https://github.com/element-hq/element-web/pull/28295)). Contributed by @florianduros.
+* Fix other devices not being decorated as such ([#28279](https://github.com/element-hq/element-web/pull/28279)). Contributed by @t3chguy.
+* Fix pill contrast in invitation dialog ([#28250](https://github.com/element-hq/element-web/pull/28250)). Contributed by @florianduros.
+* Close right panel chat when minimising maximised voip widget ([#28241](https://github.com/element-hq/element-web/pull/28241)). Contributed by @t3chguy.
+* Fix develop changelog parsing ([#28232](https://github.com/element-hq/element-web/pull/28232)). Contributed by @t3chguy.
+* Fix Ctrl+F shortcut not working with minimised room summary card ([#28223](https://github.com/element-hq/element-web/pull/28223)). Contributed by @t3chguy.
+* Fix network dropdown missing checkbox \& aria-checked ([#28220](https://github.com/element-hq/element-web/pull/28220)). Contributed by @t3chguy.
+
+
+Changes in [1.11.83](https://github.com/element-hq/element-web/releases/tag/v1.11.83) (2024-10-29)
+==================================================================================================
+## ✨ Features
+
+* Enable Element Call by default on release instances ([#28314](https://github.com/element-hq/element-web/pull/28314)). Contributed by @t3chguy.
+
+
+
+Changes in [1.11.82](https://github.com/element-hq/element-web/releases/tag/v1.11.82) (2024-10-22)
+==================================================================================================
+## ✨ Features
+
+* Deduplicate more icons using Compound Design Tokens ([#132](https://github.com/element-hq/matrix-react-sdk/pull/132)). Contributed by @t3chguy.
+* Always show link new device flow even if unsupported ([#147](https://github.com/element-hq/matrix-react-sdk/pull/147)). Contributed by @t3chguy.
+* Update design of files list in right panel ([#144](https://github.com/element-hq/matrix-react-sdk/pull/144)). Contributed by @t3chguy.
+* Remove feature\_dehydration ([#138](https://github.com/element-hq/matrix-react-sdk/pull/138)). Contributed by @florianduros.
+* Upgrade emojibase-bindings and remove local handling of emoticon variations ([#127](https://github.com/element-hq/matrix-react-sdk/pull/127)). Contributed by @langleyd.
+* Add support for rendering media captions ([#43](https://github.com/element-hq/matrix-react-sdk/pull/43)). Contributed by @tulir.
+* Replace composer icons with Compound variants ([#123](https://github.com/element-hq/matrix-react-sdk/pull/123)). Contributed by @t3chguy.
+* Tweak default right panel size to be 320px except for maximised widgets at 420px ([#110](https://github.com/element-hq/matrix-react-sdk/pull/110)). Contributed by @t3chguy.
+* Add a pinned message badge under a pinned message ([#118](https://github.com/element-hq/matrix-react-sdk/pull/118)). Contributed by @florianduros.
+* Ditch right panel tabs and re-add close button ([#99](https://github.com/element-hq/matrix-react-sdk/pull/99)). Contributed by @t3chguy.
+* Force verification even for refreshed clients ([#44](https://github.com/element-hq/matrix-react-sdk/pull/44)). Contributed by @dbkr.
+* Update emoji text, border and background colour in timeline ([#119](https://github.com/element-hq/matrix-react-sdk/pull/119)). Contributed by @florianduros.
+* Disable ICE fallback based on well-known configuration ([#111](https://github.com/element-hq/matrix-react-sdk/pull/111)). Contributed by @t3chguy.
+* Remove legacy room header and promote beta room header ([#105](https://github.com/element-hq/matrix-react-sdk/pull/105)). Contributed by @t3chguy.
+* Respect `io.element.jitsi` `useFor1To1Calls` in well-known ([#112](https://github.com/element-hq/matrix-react-sdk/pull/112)). Contributed by @t3chguy.
+* Use Compound close icon in favour of mishmash of x/close icons ([#108](https://github.com/element-hq/matrix-react-sdk/pull/108)). Contributed by @t3chguy.
+
+## 🐛 Bug Fixes
+
+* Correct typo in option documentation ([#28148](https://github.com/element-hq/element-web/pull/28148)). Contributed by @AndrewKvalheim.
+* Revert #124 and #135 ([#139](https://github.com/element-hq/matrix-react-sdk/pull/139)). Contributed by @dbkr.
+* Add aria-label to e2e icon ([#136](https://github.com/element-hq/matrix-react-sdk/pull/136)). Contributed by @florianduros.
+* Fix bell icons on room list hover being black squares ([#135](https://github.com/element-hq/matrix-react-sdk/pull/135)). Contributed by @dbkr.
+* Fix vertical overflow on the mobile register screen ([#137](https://github.com/element-hq/matrix-react-sdk/pull/137)). Contributed by @langleyd.
+* Allow to unpin redacted event ([#98](https://github.com/element-hq/matrix-react-sdk/pull/98)). Contributed by @florianduros.
+
+
+
+Changes in [1.11.81](https://github.com/element-hq/element-web/releases/tag/v1.11.81) (2024-10-15)
+==================================================================================================
+This release fixes High severity vulnerability CVE-2024-47771 / GHSA-963w-49j9-gxj6
+
+Changes in [1.11.80](https://github.com/element-hq/element-web/releases/tag/v1.11.80) (2024-10-08)
+==================================================================================================
+## ✨ Features
+
+* Add doc for 'force\_verification config option ([#28035](https://github.com/element-hq/element-web/pull/28035)). Contributed by @dbkr.
+* Roll back change to device isolation mode ([#104](https://github.com/element-hq/matrix-react-sdk/pull/104)). Contributed by @richvdh.
+* Remove right panel toggling behaviour on room header buttons ([#100](https://github.com/element-hq/matrix-react-sdk/pull/100)). Contributed by @t3chguy.
+* Improve error display for messages sent from insecure devices ([#93](https://github.com/element-hq/matrix-react-sdk/pull/93)). Contributed by @richvdh.
+* Add labs option to exclude unverified devices ([#92](https://github.com/element-hq/matrix-react-sdk/pull/92)). Contributed by @richvdh.
+* Improve contrast for timestamps, date separators \& spotlight trigger ([#91](https://github.com/element-hq/matrix-react-sdk/pull/91)). Contributed by @t3chguy.
+* Open room settings on room header avatar click ([#88](https://github.com/element-hq/matrix-react-sdk/pull/88)). Contributed by @t3chguy.
+* Use `strong` over `b` for improved a11y semantics ([#41](https://github.com/element-hq/matrix-react-sdk/pull/41)). Contributed by @t3chguy.
+* Grant Element Call widget capabilities for "raise hand" feature ([#82](https://github.com/element-hq/matrix-react-sdk/pull/82)). Contributed by @AndrewFerr.
+* Mobile registration optimizations and tests ([#62](https://github.com/element-hq/matrix-react-sdk/pull/62)). Contributed by @langleyd.
+* Ignore chat effect when older than 48h ([#48](https://github.com/element-hq/matrix-react-sdk/pull/48)). Contributed by @florianduros.
+
+## 🐛 Bug Fixes
+
+* Update native OIDC callback url to be RFC8252 compliant ([#28096](https://github.com/element-hq/element-web/pull/28096)). Contributed by @t3chguy.
+* Update icons to include transparency ([#28040](https://github.com/element-hq/element-web/pull/28040)). Contributed by @t3chguy.
+* Fix default\_widget\_container\_height in sample config ([#28034](https://github.com/element-hq/element-web/pull/28034)). Contributed by @dbkr.
+* Fix untranslated keys being rendered in `/help` dialog ([#90](https://github.com/element-hq/matrix-react-sdk/pull/90)). Contributed by @t3chguy.
+* Ensure timeline search results are visible even in video rooms ([#96](https://github.com/element-hq/matrix-react-sdk/pull/96)). Contributed by @t3chguy.
+* Pop right panel timeline when unmaximising widget to avoid double timeline ([#94](https://github.com/element-hq/matrix-react-sdk/pull/94)). Contributed by @t3chguy.
+* Fix accessible label on left panel spotlight trigger ([#87](https://github.com/element-hq/matrix-react-sdk/pull/87)). Contributed by @t3chguy.
+* Crypto: fix display of device key ([#86](https://github.com/element-hq/matrix-react-sdk/pull/86)). Contributed by @richvdh.
+
+
+
 Changes in [1.11.79](https://github.com/element-hq/element-web/releases/tag/v1.11.79) (2024-10-01)
 ==================================================================================================
 * No changes

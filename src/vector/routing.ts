@@ -2,7 +2,7 @@
 Copyright 2024 New Vector Ltd.
 Copyright 2022 The Matrix.org Foundation C.I.C.
 
-SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Commercial
 Please see LICENSE files in the repository root for full details.
 */
 
@@ -10,7 +10,6 @@ Please see LICENSE files in the repository root for full details.
 // MatrixChat.showScreen(screen, params)
 import { logger } from "matrix-js-sdk/src/logger";
 import { QueryDict } from "matrix-js-sdk/src/utils";
-import MatrixChatType from "matrix-react-sdk/src/components/structures/MatrixChat";
 
 import { parseQsFromFragment } from "./url_utils";
 
@@ -31,7 +30,7 @@ function routeUrl(location: Location): void {
 
     logger.log("Routing URL ", location.href);
     const s = getScreenFromLocation(location);
-    (window.matrixChat as MatrixChatType).showScreen(s.screen, s.params);
+    window.matrixChat.showScreen(s.screen, s.params);
 }
 
 function onHashChange(): void {
