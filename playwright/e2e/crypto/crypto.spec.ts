@@ -16,8 +16,8 @@ import {
     enableKeyBackup,
     verify,
 } from "./utils";
-import { Bot } from "../../pages/bot";
-import { ElementAppPage } from "../../pages/ElementAppPage";
+import { type Bot } from "../../pages/bot";
+import { type ElementAppPage } from "../../pages/ElementAppPage";
 import { isDendrite } from "../../plugins/homeserver/dendrite";
 
 const checkDMRoom = async (page: Page) => {
@@ -28,7 +28,7 @@ const checkDMRoom = async (page: Page) => {
 };
 
 const startDMWithBob = async (page: Page, bob: Bot) => {
-    await page.locator(".mx_RoomList").getByRole("button", { name: "Start chat" }).click();
+    await page.locator(".mx_LegacyRoomList").getByRole("button", { name: "Start chat" }).click();
     await page.getByTestId("invite-dialog-input").fill(bob.credentials.userId);
     await page.locator(".mx_InviteDialog_tile_nameStack_name").getByText("Bob").click();
     await expect(
@@ -162,6 +162,7 @@ test.describe("Cryptography", function () {
     }
 
     test("Can reset cross-signing keys", async ({ page, app, user: aliceCredentials }) => {
+        await app.client.bootstrapCrossSigning(aliceCredentials);
         const secretStorageKey = await enableKeyBackup(app);
 
         // Fetch the current cross-signing keys
@@ -186,7 +187,7 @@ test.describe("Cryptography", function () {
         await page.getByRole("button", { name: "Clear cross-signing keys" }).click();
 
         // Enter the 4S key
-        await page.getByPlaceholder("Security Key").fill(secretStorageKey);
+        await page.getByPlaceholder("Recovery Key").fill(secretStorageKey);
         await page.getByRole("button", { name: "Continue" }).click();
 
         // Enter the password

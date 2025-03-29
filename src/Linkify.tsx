@@ -6,17 +6,12 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { ReactElement } from "react";
-import sanitizeHtml, { IOptions } from "sanitize-html";
+import React, { type ReactElement } from "react";
+import sanitizeHtml, { type IOptions } from "sanitize-html";
 import { merge } from "lodash";
 import _Linkify from "linkify-react";
 
-import {
-    _linkifyElement,
-    _linkifyString,
-    ELEMENT_URL_PATTERN,
-    options as linkifyMatrixOptions,
-} from "./linkify-matrix";
+import { _linkifyString, ELEMENT_URL_PATTERN, options as linkifyMatrixOptions } from "./linkify-matrix";
 import SettingsStore from "./settings/SettingsStore";
 import { tryTransformPermalinkToLocalHref } from "./utils/permalinks/Permalinks";
 import { mediaFromMxc } from "./customisations/Media";
@@ -221,17 +216,6 @@ export function Linkify({ as, options, children }: React.ComponentProps<typeof _
  */
 export function linkifyString(str: string, options = linkifyMatrixOptions): string {
     return _linkifyString(str, options);
-}
-
-/**
- * Linkifies the given DOM element. This is a wrapper around 'linkifyjs/element'.
- *
- * @param {object} element DOM element to linkify
- * @param {object} [options] Options for linkifyElement. Default: linkifyMatrixOptions
- * @returns {object}
- */
-export function linkifyElement(element: HTMLElement, options = linkifyMatrixOptions): HTMLElement {
-    return _linkifyElement(element, options);
 }
 
 /**

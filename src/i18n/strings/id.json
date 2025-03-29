@@ -365,7 +365,6 @@
         "download_logs": "Unduh catatan",
         "downloading_logs": "Mengunduh catatan",
         "error_empty": "Mohon beri tahu kami apa saja yang salah atau, lebih baik, buat sebuah issue GitHub yang menjelaskan masalahnya.",
-        "failed_send_logs": "Gagal untuk mengirimkan catatan: ",
         "github_issue": "Masalah GitHub",
         "introduction": "Jika Anda mengirim sebuah kutu via GitHub, catatan pengawakutu dapat membantu kami melacak masalahnya. ",
         "log_request": "Untuk membantu kami mencegahnya di masa mendatang, silakan <a>kirimkan kami catatan</a>.",
@@ -405,7 +404,6 @@
         "access_token": "Token Akses",
         "accessibility": "Aksesibilitas",
         "advanced": "Tingkat Lanjut",
-        "all_rooms": "Semua ruangan",
         "analytics": "Analitik",
         "and_n_others": {
             "one": "dan satu lainnya...",
@@ -502,7 +500,6 @@
         "rooms": "Ruangan",
         "saving": "Menyimpan…",
         "secure_backup": "Cadangan Aman",
-        "security": "Keamanan",
         "select_all": "Pilih semua",
         "server": "Server",
         "settings": "Pengaturan",
@@ -521,7 +518,6 @@
         "thread": "Utasan",
         "threads": "Utasan",
         "timeline": "Lini Masa",
-        "trusted": "Dipercayai",
         "unavailable": "tidak tersedia",
         "unencrypted": "Tidak Dienkripsi",
         "unmute": "Suarakan",
@@ -873,7 +869,6 @@
             "title": "Tidak Dipercayai"
         },
         "unable_to_setup_keys_error": "Tidak dapat mengatur kunci-kunci",
-        "unsupported": "Klien ini tidak mendukung enkripsi ujung ke ujung.",
         "verification": {
             "accepting": "Menerima…",
             "after_new_login": {
@@ -3152,7 +3147,9 @@
             "sent": "%(senderName)s mengirim sebuah undangan ke %(targetDisplayName)s untuk bergabung dengan ruangan ini."
         },
         "m.room.tombstone": "%(senderDisplayName)s meningkatkan ruangan ini.",
-        "m.room.topic": "%(senderDisplayName)s telah mengubah topik menjadi \"%(topic)s\".",
+        "m.room.topic": {
+            "changed": "%(senderDisplayName)s telah mengubah topik menjadi \"%(topic)s\"."
+        },
         "m.sticker": "%(senderDisplayName)s mengirim sebuah stiker.",
         "m.video": {
             "error_decrypting": "Terjadi kesalahan mendekripsi video"
@@ -3427,14 +3424,6 @@
         "ban_room_confirm_title": "Cekal dari %(roomName)s",
         "ban_space_everything": "Cekal dari semuanya yang saya dapat melakukan",
         "ban_space_specific": "Cekal dari beberapa hal yang saya dapat melakukan",
-        "count_of_sessions": {
-            "one": "%(count)s sesi",
-            "other": "%(count)s sesi"
-        },
-        "count_of_verified_sessions": {
-            "one": "1 sesi terverifikasi",
-            "other": "%(count)s sesi terverifikasi"
-        },
         "deactivate_confirm_action": "Nonaktifkan pengguna",
         "deactivate_confirm_description": "Menonaktifkan pengguna ini akan mengeluarkan dan mencegahnya masuk ke akun lagi. Pengguna itu juga akan meninggalkan semua ruangan yang pengguna itu berada. Aksi ini tidak dapat dibatalkan. Apakah Anda yakin Anda ingin menonaktifkan pengguna ini?",
         "deactivate_confirm_title": "Nonaktifkan pengguna?",
@@ -3445,15 +3434,12 @@
         "disinvite_button_room": "Batalkan undangan dari ruangan",
         "disinvite_button_room_name": "Batalkan pengundangan dari %(roomName)s",
         "disinvite_button_space": "Batalkan undangan dari space",
-        "edit_own_devices": "Edit perangkat",
         "error_ban_user": "Gagal untuk mencekal pengguna",
         "error_deactivate": "Gagal untuk menonaktifkan pengguna",
         "error_kicking_user": "Gagal untuk mengeluarkan pengguna",
         "error_mute_user": "Gagal untuk membisukan pengguna",
         "error_revoke_3pid_invite_description": "Tidak dapat menghapus undangan. Server ini mungkin mengalami masalah sementara atau Anda tidak memiliki izin yang dibutuhkan untuk menghapus undangannya.",
         "error_revoke_3pid_invite_title": "Gagal untuk menghapus undangan",
-        "hide_sessions": "Sembunyikan sesi",
-        "hide_verified_sessions": "Sembunyikan sesi terverifikasi",
         "ignore_confirm_description": "Semua pesan dan undangan dari pengguna ini akan disembunyikan. Apakah Anda yakin ingin mengabaikan?",
         "ignore_confirm_title": "Abaikan %(user)s",
         "invited_by": "Diundang oleh %(sender)s",
@@ -3541,7 +3527,6 @@
         "hide_sidebar_button": "Sembunyikan sisi bilah",
         "input_devices": "Perangkat masukan",
         "join_button_tooltip_call_full": "Maaf — panggilan ini saat ini penuh",
-        "join_button_tooltip_connecting": "Menghubungkan",
         "maximise": "Penuhi layar",
         "misconfigured_server": "Panggilan gagal karena servernya tidak dikonfigurasi dengan benar",
         "misconfigured_server_description": "Mohon tanyakan ke administrator homeserver Anda (<code>%(homeserverDomain)s</code>) untuk mengkonfigurasikan server TURN supaya panggilan dapat bekerja dengan benar.",

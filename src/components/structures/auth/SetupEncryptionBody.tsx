@@ -6,10 +6,10 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React from "react";
-import { KeyBackupInfo, VerificationRequest } from "matrix-js-sdk/src/crypto-api";
+import React, { type JSX } from "react";
+import { type KeyBackupInfo, type VerificationRequest } from "matrix-js-sdk/src/crypto-api";
 import { logger } from "matrix-js-sdk/src/logger";
-import { SecretStorageKeyDescription } from "matrix-js-sdk/src/secret-storage";
+import { type SecretStorageKeyDescription } from "matrix-js-sdk/src/secret-storage";
 
 import { _t } from "../../../languageHandler";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
@@ -17,7 +17,7 @@ import Modal from "../../../Modal";
 import VerificationRequestDialog from "../../views/dialogs/VerificationRequestDialog";
 import { SetupEncryptionStore, Phase } from "../../../stores/SetupEncryptionStore";
 import EncryptionPanel from "../../views/right_panel/EncryptionPanel";
-import AccessibleButton, { ButtonEvent } from "../../views/elements/AccessibleButton";
+import AccessibleButton, { type ButtonEvent } from "../../views/elements/AccessibleButton";
 import Spinner from "../../views/elements/Spinner";
 
 function keyHasPassphrase(keyInfo: SecretStorageKeyDescription): boolean {

@@ -6,19 +6,19 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import * as React from "react";
+import React from "react";
 import {
     ClientWidgetApi,
-    IModalWidgetCloseRequest,
-    IModalWidgetOpenRequestData,
-    IModalWidgetReturnData,
-    ISetModalButtonEnabledActionRequest,
-    IWidgetApiAcknowledgeResponseData,
-    IWidgetApiErrorResponseData,
+    type IModalWidgetCloseRequest,
+    type IModalWidgetOpenRequestData,
+    type IModalWidgetReturnData,
+    type ISetModalButtonEnabledActionRequest,
+    type IWidgetApiAcknowledgeResponseData,
+    type IWidgetApiErrorResponseData,
     BuiltInModalButtonID,
-    ModalButtonID,
+    type ModalButtonID,
     ModalButtonKind,
-    Widget,
+    type Widget,
     WidgetApiFromWidgetAction,
     WidgetKind,
 } from "matrix-widget-api";
@@ -26,7 +26,7 @@ import { ErrorIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import BaseDialog from "./BaseDialog";
 import { _t, getUserLanguage } from "../../../languageHandler";
-import AccessibleButton, { AccessibleButtonKind } from "../elements/AccessibleButton";
+import AccessibleButton, { type AccessibleButtonKind } from "../elements/AccessibleButton";
 import { StopGapWidgetDriver } from "../../../stores/widgets/StopGapWidgetDriver";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
 import { OwnProfileStore } from "../../../stores/OwnProfileStore";
@@ -53,7 +53,7 @@ const MAX_BUTTONS = 3;
 export default class ModalWidgetDialog extends React.PureComponent<IProps, IState> {
     private readonly widget: Widget;
     private readonly possibleButtons: ModalButtonID[];
-    private appFrame: React.RefObject<HTMLIFrameElement> = React.createRef();
+    private appFrame = React.createRef<HTMLIFrameElement>();
     private readonly themeWatcher = new ThemeWatcher();
 
     public state: IState = {

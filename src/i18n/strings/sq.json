@@ -357,7 +357,6 @@
         "download_logs": "Shkarko regjistra",
         "downloading_logs": "Po shkarkohen regjistra",
         "error_empty": "Ju lutemi, na tregoni ç’shkoi keq ose, akoma më mirë, krijoni në GitHub një çështje që përshkruan problemin.",
-        "failed_send_logs": "S’u arrit të dërgoheshin regjistra: ",
         "github_issue": "Çështje në GitHub",
         "introduction": "Nëse keni parashtruar një të metë përmes GitHub-i, regjistrat e diagnostikimit na ndihmojnë të kapim problemin. ",
         "log_request": "Për të na ndihmuar ta parandalojmë këtë në të ardhmen, ju lutemi, <a>dërgonani regjistra</a>.",
@@ -397,7 +396,6 @@
         "access_token": "Token Hyrjesh",
         "accessibility": "Përdorim nga persona me aftësi të kufizuara",
         "advanced": "Të mëtejshme",
-        "all_rooms": "Krejt dhomat",
         "analytics": "Analiza",
         "and_n_others": {
             "other": "dhe %(count)s të tjerë…",
@@ -484,7 +482,6 @@
         "rooms": "Dhoma",
         "saving": "Po ruhet…",
         "secure_backup": "Kopjeruajtje e Sigurt",
-        "security": "Siguri",
         "select_all": "Përzgjidhi krejt",
         "server": "Shërbyes",
         "settings": "Rregullime",
@@ -502,7 +499,6 @@
         "thread": "Rrjedhë",
         "threads": "Rrjedha",
         "timeline": "Rrjedhë Kohore",
-        "trusted": "E besuar",
         "unencrypted": "Të pafshehtëzuara",
         "unmute": "Ktheji zërin",
         "unnamed_room": "Dhomë e Paemërtuar",
@@ -841,7 +837,6 @@
             "title": "Jo e Besuar"
         },
         "unable_to_setup_keys_error": "S’arrihet të ujdisen kyçe",
-        "unsupported": "Ky klient nuk mbulon fshehtëzim skaj-më-skaj.",
         "verification": {
             "accepting": "Po pranohet…",
             "after_new_login": {
@@ -2995,7 +2990,9 @@
             "sent": "%(senderName)s dërgoi një ftesë për %(targetDisplayName)s që të marrë pjesë në dhomë."
         },
         "m.room.tombstone": "%(senderDisplayName)s e përmirësoi këtë dhomë.",
-        "m.room.topic": "%(senderDisplayName)s ndryshoi temën në \"%(topic)s\".",
+        "m.room.topic": {
+            "changed": "%(senderDisplayName)s ndryshoi temën në \"%(topic)s\"."
+        },
         "m.sticker": "%(senderDisplayName)s dërgoi një ngjitës.",
         "m.video": {
             "error_decrypting": "Gabim në shfshehtëzim videoje"
@@ -3258,14 +3255,6 @@
         "ban_room_confirm_title": "Dëboje prej %(roomName)s",
         "ban_space_everything": "Dëboji prej gjithçkaje ku mundem ta bëj këtë",
         "ban_space_specific": "Dëboji prej gjërash të caktuara ku mundem ta bëj këtë",
-        "count_of_sessions": {
-            "other": "%(count)s sesione",
-            "one": "%(count)s sesion"
-        },
-        "count_of_verified_sessions": {
-            "other": "%(count)s sesione të verifikuar",
-            "one": "1 sesion i verifikuar"
-        },
         "deactivate_confirm_action": "Çaktivizoje përdoruesin",
         "deactivate_confirm_description": "Çaktivizimi i këtij përdoruesi do të sjellë nxjerrjen e tij nga llogaria përkatëse dhe do të pengojë rihyrjen e tij. Veç kësaj, do të braktisë krejt dhomat ku ndodhet. Ky veprim s’mund të prapësohet. Jeni i sigurt se doni të çaktivizohet ky përdorues?",
         "deactivate_confirm_title": "Të çaktivizohet përdoruesi?",
@@ -3276,15 +3265,12 @@
         "disinvite_button_room": "Hiqi ftesën për këtë dhomë",
         "disinvite_button_room_name": "Hiqja ftesën për %(roomName)s",
         "disinvite_button_space": "Hiqi ftesën për këtë hapësirë",
-        "edit_own_devices": "Përpunoni pajisje",
         "error_ban_user": "S’u arrit të dëbohej përdoruesi",
         "error_deactivate": "S’u arrit të çaktivizohet përdorues",
         "error_kicking_user": "S’u arrit të hiqej përdoruesi",
         "error_mute_user": "S’u arrit t’i hiqej zëri përdoruesit",
         "error_revoke_3pid_invite_description": "S’u shfuqizua dot ftesa. Shërbyesi mund të jetë duke kaluar një problem të përkohshëm ose s’keni leje të mjaftueshme për të shfuqizuar ftesën.",
         "error_revoke_3pid_invite_title": "S’u arrit të shfuqizohej ftesa",
-        "hide_sessions": "Fshih sesione",
-        "hide_verified_sessions": "Fshih sesione të verifikuar",
         "ignore_confirm_description": "Krejt mesazhet dhe ftesat prej këtij përdoruesi do të fshihen. Jeni i sigurt se doni të shpërfillet?",
         "ignore_confirm_title": "Shpërfille %(user)s",
         "invited_by": "Ftuar nga %(sender)s",
@@ -3371,7 +3357,6 @@
         "hide_sidebar_button": "Fshihe anështyllën",
         "input_devices": "Pajisje input-i",
         "join_button_tooltip_call_full": "Na ndjeni — aktualisht kjo thirrje është plot",
-        "join_button_tooltip_connecting": "Po lidhet",
         "maximise": "Mbushe ekranin",
         "misconfigured_server": "Thirrja dështoi për shkak shërbyesi të keqformësuar",
         "misconfigured_server_description": "Që thirrjet të funksionojnë pa probleme, ju lutemi, kërkojini përgjegjësit të shërbyesit tuaj Home (<code>%(homeserverDomain)s</code>) të formësojë një shërbyes TURN.",

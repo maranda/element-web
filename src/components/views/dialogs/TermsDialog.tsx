@@ -6,13 +6,13 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React from "react";
+import React, { type JSX } from "react";
 import { SERVICE_TYPES } from "matrix-js-sdk/src/matrix";
 
 import { _t } from "../../../languageHandler";
 import DialogButtons from "../elements/DialogButtons";
 import BaseDialog from "./BaseDialog";
-import { pickBestPolicyLanguage, ServicePolicyPair } from "../../../Terms";
+import { pickBestPolicyLanguage, type ServicePolicyPair } from "../../../Terms";
 import ExternalLink from "../elements/ExternalLink";
 import { parseUrl } from "../../../utils/UrlUtils";
 

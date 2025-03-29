@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import { MatrixClient } from "matrix-js-sdk/src/matrix";
+import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 import { render, screen, waitFor } from "jest-matrix-react";
 import userEvent from "@testing-library/user-event";
 
@@ -75,7 +75,7 @@ describe("<AdvancedPanel />", () => {
 
             expect(screen.getByTestId("otherSettings")).toMatchSnapshot();
             const checkbox = screen.getByRole("checkbox", {
-                name: "Never send encrypted messages to unverified devices",
+                name: "In encrypted rooms, only send messages to verified users",
             });
             expect(checkbox).toBeChecked();
 

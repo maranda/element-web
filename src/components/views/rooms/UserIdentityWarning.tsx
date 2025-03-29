@@ -6,7 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React from "react";
-import { Room, RoomMember } from "matrix-js-sdk/src/matrix";
+import { type Room, type RoomMember } from "matrix-js-sdk/src/matrix";
 import { Button, Separator } from "@vector-im/compound-web";
 import classNames from "classnames";
 
@@ -14,9 +14,9 @@ import { _t } from "../../../languageHandler";
 import MemberAvatar from "../avatars/MemberAvatar";
 import {
     useUserIdentityWarningViewModel,
-    ViolationPrompt,
+    type ViolationPrompt,
 } from "../../viewmodels/rooms/UserIdentityWarningViewModel.tsx";
-import { ButtonEvent } from "../elements/AccessibleButton.tsx";
+import { type ButtonEvent } from "../elements/AccessibleButton.tsx";
 
 interface UserIdentityWarningProps {
     /**
@@ -33,7 +33,7 @@ interface UserIdentityWarningProps {
 /**
  * Displays a banner warning when there is an issue with a user's identity.
  *
- * Warns when an unverified user's identity has changed, and gives the user a
+ * Warns when an unverified user's identity was reset, and gives the user a
  * button to acknowledge the change.
  */
 export const UserIdentityWarning: React.FC<UserIdentityWarningProps> = ({ room }) => {
@@ -104,7 +104,7 @@ function getTitleAndAction(prompt: ViolationPrompt): [title: React.ReactNode, ac
                 },
             );
         }
-        action = _t("action|ok");
+        action = _t("action|dismiss");
     }
     return [title, action];
 }

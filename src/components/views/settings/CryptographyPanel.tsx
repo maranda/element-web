@@ -6,8 +6,9 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { lazy } from "react";
+import React, { type JSX, lazy } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
+import { type EmptyObject } from "matrix-js-sdk/src/matrix";
 
 import { _t } from "../../../languageHandler";
 import Modal from "../../../Modal";
@@ -19,8 +20,6 @@ import { SettingLevel } from "../../../settings/SettingLevel";
 import { SettingsSubsection, SettingsSubsectionText } from "./shared/SettingsSubsection";
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
 
-interface IProps {}
-
 interface IState {
     /** The device's base64-encoded Ed25519 identity key, or:
      *
@@ -30,11 +29,11 @@ interface IState {
     deviceIdentityKey: string | undefined | null;
 }
 
-export default class CryptographyPanel extends React.Component<IProps, IState> {
+export default class CryptographyPanel extends React.Component<EmptyObject, IState> {
     public static contextType = MatrixClientContext;
     declare public context: React.ContextType<typeof MatrixClientContext>;
 
-    public constructor(props: IProps, context: React.ContextType<typeof MatrixClientContext>) {
+    public constructor(props: EmptyObject, context: React.ContextType<typeof MatrixClientContext>) {
         super(props);
 
         if (!context.getCrypto()) {

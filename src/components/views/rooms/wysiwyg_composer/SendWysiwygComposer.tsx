@@ -6,16 +6,16 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { ForwardedRef, forwardRef, MutableRefObject, useMemo } from "react";
-import { IEventRelation } from "matrix-js-sdk/src/matrix";
+import React, { type JSX, type ForwardedRef, forwardRef, type RefObject, useMemo } from "react";
+import { type IEventRelation } from "matrix-js-sdk/src/matrix";
 
 import { useWysiwygSendActionHandler } from "./hooks/useWysiwygSendActionHandler";
 import { WysiwygComposer } from "./components/WysiwygComposer";
 import { PlainTextComposer } from "./components/PlainTextComposer";
-import { ComposerFunctions } from "./types";
-import { E2EStatus } from "../../../../utils/ShieldUtils";
+import { type ComposerFunctions } from "./types";
+import { type E2EStatus } from "../../../../utils/ShieldUtils";
 import E2EIcon from "../E2EIcon";
-import { MenuProps } from "../../../structures/ContextMenu";
+import { type MenuProps } from "../../../structures/ContextMenu";
 import { Emoji } from "./components/Emoji";
 import { ComposerContext, getDefaultContextValue } from "./ComposerContext";
 
@@ -28,7 +28,7 @@ const Content = forwardRef<HTMLElement, ContentProps>(function Content(
     { disabled = false, composerFunctions }: ContentProps,
     forwardRef: ForwardedRef<HTMLElement>,
 ) {
-    useWysiwygSendActionHandler(disabled, forwardRef as MutableRefObject<HTMLElement>, composerFunctions);
+    useWysiwygSendActionHandler(disabled, forwardRef as RefObject<HTMLElement>, composerFunctions);
     return null;
 });
 

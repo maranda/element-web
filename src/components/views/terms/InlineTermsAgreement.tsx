@@ -6,13 +6,13 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React from "react";
+import React, { type JSX } from "react";
 
 import { _t } from "../../../languageHandler";
 import { objectClone } from "../../../utils/objects";
 import StyledCheckbox from "../elements/StyledCheckbox";
 import AccessibleButton from "../elements/AccessibleButton";
-import { pickBestPolicyLanguage, ServicePolicyPair } from "../../../Terms";
+import { pickBestPolicyLanguage, type ServicePolicyPair } from "../../../Terms";
 
 interface IProps {
     policiesAndServicePairs: ServicePolicyPair[];

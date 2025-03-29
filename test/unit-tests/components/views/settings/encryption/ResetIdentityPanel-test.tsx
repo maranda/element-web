@@ -6,7 +6,8 @@
  */
 
 import React from "react";
-import { MatrixClient } from "matrix-js-sdk/src/matrix";
+import { type MatrixClient } from "matrix-js-sdk/src/matrix";
+import { sleep, defer } from "matrix-js-sdk/src/utils";
 import { render, screen } from "jest-matrix-react";
 import userEvent from "@testing-library/user-event";
 
@@ -25,13 +26,32 @@ describe("<ResetIdentityPanel />", () => {
 
         const onFinish = jest.fn();
         const { asFragment } = render(
-            <ResetIdentityPanel onFinish={onFinish} onCancelClick={jest.fn()} />,
+            <ResetIdentityPanel variant="compromised" onFinish={onFinish} onCancelClick={jest.fn()} />,
             withClientContextRenderOptions(matrixClient),
         );
         expect(asFragment()).toMatchSnapshot();
 
-        await user.click(screen.getByRole("button", { name: "Continue" }));
+        // We need to pause the reset so that we can check that it's providing
+        // feedback to the user that something is happening.
+        const { promise: resetEncryptionPromise, resolve: resolveResetEncryption } = defer();
+        jest.spyOn(matrixClient.getCrypto()!, "resetEncryption").mockReturnValue(resetEncryptionPromise);
+
+        const continueButton = screen.getByRole("button", { name: "Continue" });
+        await user.click(continueButton);
+        expect(asFragment()).toMatchSnapshot();
+        resolveResetEncryption!();
+        await sleep(0);
+
         expect(matrixClient.getCrypto()!.resetEncryption).toHaveBeenCalled();
         expect(onFinish).toHaveBeenCalled();
+    });
+
+    it("should display the 'forgot recovery key' variant correctly", async () => {
+        const onFinish = jest.fn();
+        const { asFragment } = render(
+            <ResetIdentityPanel variant="forgot" onFinish={onFinish} onCancelClick={jest.fn()} />,
+            withClientContextRenderOptions(matrixClient),
+        );
+        expect(asFragment()).toMatchSnapshot();
     });
 });
