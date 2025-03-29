@@ -4,9 +4,9 @@
 FROM --platform=$BUILDPLATFORM node:22-bullseye AS builder
 
 # Support custom branch of the js-sdk. This also helps us build images of element-web develop.
-ARG USE_CUSTOM_SDKS=false
-ARG JS_SDK_REPO="https://github.com/matrix-org/matrix-js-sdk.git"
-ARG JS_SDK_BRANCH="master"
+ARG USE_CUSTOM_SDKS=true
+ARG JS_SDK_REPO="https://github.com/maranda/matrix-js-sdk.git"
+ARG JS_SDK_BRANCH="aria-net"
 
 WORKDIR /src
 
