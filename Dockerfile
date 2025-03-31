@@ -41,6 +41,6 @@ RUN rm -rf /usr/share/nginx/html \
 USER nginx
 
 # HTTP listen port
-ENV ELEMENT_WEB_PORT=80
+ENV ELEMENT_WEB_PORT=8080
 
 HEALTHCHECK --start-period=5s CMD wget -q --spider http://localhost:$ELEMENT_WEB_PORT/config.json
