@@ -19,8 +19,9 @@ exports[`<ThirdPartyMemberInfo /> should render invite 1`] = `
         </p>
       </div>
       <button
-        aria-labelledby=":r0:"
-        class="_icon-button_m2erp_8 _subtle-bg_m2erp_29"
+        aria-labelledby="«r0»"
+        class="_icon-button_1pz9o_8"
+        data-kind="secondary"
         data-testid="base-card-close-button"
         role="button"
         style="--cpd-icon-button-size: 28px;"
@@ -93,8 +94,9 @@ exports[`<ThirdPartyMemberInfo /> should render invite when room in not availabl
         </p>
       </div>
       <button
-        aria-labelledby=":r6:"
-        class="_icon-button_m2erp_8 _subtle-bg_m2erp_29"
+        aria-labelledby="«r6»"
+        class="_icon-button_1pz9o_8"
+        data-kind="secondary"
         data-testid="base-card-close-button"
         role="button"
         style="--cpd-icon-button-size: 28px;"

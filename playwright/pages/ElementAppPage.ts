@@ -114,7 +114,7 @@ export class ElementAppPage {
      * @param isRightPanel whether to select the right panel composer, otherwise the main timeline composer
      */
     public getComposerField(isRightPanel?: boolean): Locator {
-        return this.getComposer(isRightPanel).locator("[contenteditable]");
+        return this.getComposer(isRightPanel).locator("div[contenteditable]");
     }
 
     /**
@@ -212,5 +212,27 @@ export class ElementAppPage {
             .locator(".mx_Toast_toast", { hasText: "Notifications" })
             .getByRole("button", { name: "Dismiss" })
             .click();
+    }
+
+    /**
+     * Scroll an infinite list to the bottom.
+     * @param list The element to scroll
+     */
+    public async scrollListToBottom(list: Locator): Promise<void> {
+        // First hover the mouse over the element that we want to scroll
+        await list.hover();
+
+        const needsScroll = async () => {
+            // From https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollHeight#determine_if_an_element_has_been_totally_scrolled
+            const fullyScrolled = await list.evaluate(
+                (e) => Math.abs(e.scrollHeight - e.clientHeight - e.scrollTop) <= 1,
+            );
+            return !fullyScrolled;
+        };
+
+        // Scroll the element until we detect that it is fully scrolled
+        do {
+            await this.page.mouse.wheel(0, 1000);
+        } while (await needsScroll());
     }
 }

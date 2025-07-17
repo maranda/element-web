@@ -8,9 +8,10 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type JSX, createRef, type CSSProperties, useRef, useState } from "react";
+import React, { type JSX, createRef, type CSSProperties, useRef, useState, useMemo, useEffect } from "react";
 import FocusLock from "react-focus-lock";
 import { type MatrixEvent, parseErrorResponse } from "matrix-js-sdk/src/matrix";
+import { logger } from "matrix-js-sdk/src/logger";
 
 import { _t } from "../../../languageHandler";
 import MemberAvatar from "../avatars/MemberAvatar";
@@ -33,6 +34,8 @@ import AccessibleButton from "./AccessibleButton";
 import Modal from "../../../Modal";
 import ErrorDialog from "../dialogs/ErrorDialog";
 import { FileDownloader } from "../../../utils/FileDownloader";
+import { MediaEventHelper } from "../../../utils/MediaEventHelper.ts";
+import ModuleApi from "../../../modules/Api";
 
 // Max scale to keep gaps around the image
 const MAX_SCALE = 0.95;
@@ -549,7 +552,7 @@ export default class ImageView extends React.Component<IProps, IState> {
                             title={_t("lightbox|rotate_right")}
                             onClick={this.onRotateClockwiseClick}
                         />
-                        <DownloadButton url={this.props.src} fileName={this.props.name} />
+                        <DownloadButton url={this.props.src} fileName={this.props.name} mxEvent={this.props.mxEvent} />
                         {contextMenuButton}
                         <AccessibleButton
                             className="mx_ImageView_button mx_ImageView_button_close"
@@ -582,10 +585,45 @@ export default class ImageView extends React.Component<IProps, IState> {
     }
 }
 
-function DownloadButton({ url, fileName }: { url: string; fileName?: string }): JSX.Element {
+function DownloadButton({
+    url,
+    fileName,
+    mxEvent,
+}: {
+    url: string;
+    fileName?: string;
+    mxEvent?: MatrixEvent;
+}): JSX.Element | null {
     const downloader = useRef(new FileDownloader()).current;
     const [loading, setLoading] = useState(false);
+    const [canDownload, setCanDownload] = useState<boolean>(false);
     const blobRef = useRef<Blob>(undefined);
+    const mediaEventHelper = useMemo(() => (mxEvent ? new MediaEventHelper(mxEvent) : undefined), [mxEvent]);
+
+    useEffect(() => {
+        if (!mxEvent) {
+            // If we have no event, we assume this is safe to download.
+            setCanDownload(true);
+            return;
+        }
+        const hints = ModuleApi.customComponents.getHintsForMessage(mxEvent);
+        if (hints?.allowDownloadingMedia) {
+            // Disable downloading as soon as we know there is a hint.
+            setCanDownload(false);
+            hints
+                .allowDownloadingMedia()
+                .then((downloadable) => {
+                    setCanDownload(downloadable);
+                })
+                .catch((ex) => {
+                    logger.error(`Failed to check if media from ${mxEvent.getId()} could be downloaded`, ex);
+                    // Err on the side of safety.
+                    setCanDownload(false);
+                });
+        } else {
+            setCanDownload(true);
+        }
+    }, [mxEvent]);
 
     function showError(e: unknown): void {
         Modal.createDialog(ErrorDialog, {
@@ -625,9 +663,13 @@ function DownloadButton({ url, fileName }: { url: string; fileName?: string }): 
     async function downloadBlob(blob: Blob): Promise<void> {
         await downloader.download({
             blob,
-            name: fileName ?? _t("common|image"),
+            name: mediaEventHelper?.fileName ?? fileName ?? _t("common|image"),
         });
         setLoading(false);
+    }
+
+    if (!canDownload) {
+        return null;
     }
 
     return (

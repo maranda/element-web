@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { createRef, forwardRef, type JSX, type MouseEvent, type ReactNode } from "react";
+import React, { createRef, type JSX, type Ref, type MouseEvent, type ReactNode } from "react";
 import classNames from "classnames";
 import {
     EventStatus,
@@ -228,6 +228,8 @@ export interface EventTileProps {
     // The following properties are used by EventTilePreview to disable tab indexes within the event tile
     hideTimestamp?: boolean;
     inhibitInteraction?: boolean;
+
+    ref?: Ref<UnwrappedEventTile>;
 }
 
 interface IState {
@@ -1235,22 +1237,19 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                         <div className={lineClasses} key="mx_EventTile_line" onContextMenu={this.onContextMenu}>
                             {this.renderContextMenu()}
                             {replyChain}
-                            {renderTile(
-                                TimelineRenderingType.Thread,
-                                {
-                                    ...this.props,
+                            {renderTile(TimelineRenderingType.Thread, {
+                                ...this.props,
 
-                                    // overrides
-                                    ref: this.tile,
-                                    isSeeingThroughMessageHiddenForModeration,
+                                // overrides
+                                ref: this.tile,
+                                isSeeingThroughMessageHiddenForModeration,
 
-                                    // appease TS
-                                    highlights: this.props.highlights,
-                                    highlightLink: this.props.highlightLink,
-                                    permalinkCreator: this.props.permalinkCreator!,
-                                },
-                                this.context.showHiddenEvents,
-                            )}
+                                // appease TS
+                                highlights: this.props.highlights,
+                                highlightLink: this.props.highlightLink,
+                                permalinkCreator: this.props.permalinkCreator!,
+                                showHiddenEvents: this.context.showHiddenEvents,
+                            })}
                             {actionBar}
                             <a href={permalink} onClick={this.onPermalinkClicked}>
                                 {timestamp}
@@ -1381,22 +1380,19 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                         </a>,
                         <div className={lineClasses} key="mx_EventTile_line" onContextMenu={this.onContextMenu}>
                             {this.renderContextMenu()}
-                            {renderTile(
-                                TimelineRenderingType.File,
-                                {
-                                    ...this.props,
+                            {renderTile(TimelineRenderingType.File, {
+                                ...this.props,
 
-                                    // overrides
-                                    ref: this.tile,
-                                    isSeeingThroughMessageHiddenForModeration,
+                                // overrides
+                                ref: this.tile,
+                                isSeeingThroughMessageHiddenForModeration,
 
-                                    // appease TS
-                                    highlights: this.props.highlights,
-                                    highlightLink: this.props.highlightLink,
-                                    permalinkCreator: this.props.permalinkCreator,
-                                },
-                                this.context.showHiddenEvents,
-                            )}
+                                // appease TS
+                                highlights: this.props.highlights,
+                                highlightLink: this.props.highlightLink,
+                                permalinkCreator: this.props.permalinkCreator,
+                                showHiddenEvents: this.context.showHiddenEvents,
+                            })}
                         </div>,
                     ],
                 );
@@ -1431,23 +1427,20 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                             {groupTimestamp}
                             {groupPadlock}
                             {replyChain}
-                            {renderTile(
-                                this.context.timelineRenderingType,
-                                {
-                                    ...this.props,
+                            {renderTile(this.context.timelineRenderingType, {
+                                ...this.props,
 
-                                    // overrides
-                                    ref: this.tile,
-                                    isSeeingThroughMessageHiddenForModeration,
-                                    timestamp: bubbleTimestamp,
+                                // overrides
+                                ref: this.tile,
+                                isSeeingThroughMessageHiddenForModeration,
+                                timestamp: bubbleTimestamp,
 
-                                    // appease TS
-                                    highlights: this.props.highlights,
-                                    highlightLink: this.props.highlightLink,
-                                    permalinkCreator: this.props.permalinkCreator,
-                                },
-                                this.context.showHiddenEvents,
-                            )}
+                                // appease TS
+                                highlights: this.props.highlights,
+                                highlightLink: this.props.highlightLink,
+                                permalinkCreator: this.props.permalinkCreator,
+                                showHiddenEvents: this.context.showHiddenEvents,
+                            })}
                             {actionBar}
                             {this.props.layout === Layout.IRC && (
                                 <>
@@ -1482,15 +1475,13 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
 }
 
 // Wrap all event tiles with the tile error boundary so that any throws even during construction are captured
-const SafeEventTile = forwardRef<UnwrappedEventTile, EventTileProps>((props, ref) => {
+const SafeEventTile = (props: EventTileProps): JSX.Element => {
     return (
-        <>
-            <TileErrorBoundary mxEvent={props.mxEvent} layout={props.layout ?? Layout.Group}>
-                <UnwrappedEventTile ref={ref} {...props} />
-            </TileErrorBoundary>
-        </>
+        <TileErrorBoundary mxEvent={props.mxEvent} layout={props.layout ?? Layout.Group}>
+            <UnwrappedEventTile {...props} />
+        </TileErrorBoundary>
     );
-});
+};
 export default SafeEventTile;
 
 function E2ePadlockUnencrypted(props: Omit<IE2ePadlockProps, "title" | "icon">): JSX.Element {

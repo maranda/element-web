@@ -8,7 +8,8 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { _td, type TranslationKey } from "../languageHandler";
+// Import i18n.tsx instead of languageHandler to avoid circular deps
+import { _td, type TranslationKey } from "../shared-components/i18n";
 import { IS_MAC, IS_ELECTRON, Key } from "../Keyboard";
 import { type IBaseSetting } from "../settings/Settings";
 import { type KeyCombo } from "../KeyBindingsManager";
@@ -521,7 +522,8 @@ export const KEYBOARD_SHORTCUTS: IKeyboardShortcuts = {
     [KeyBindingAction.GoToHome]: {
         default: {
             ctrlKey: true,
-            altKey: true,
+            altKey: !IS_MAC,
+            shiftKey: IS_MAC,
             key: Key.H,
         },
         displayName: _td("keyboard|go_home_view"),
@@ -586,7 +588,7 @@ export const KEYBOARD_SHORTCUTS: IKeyboardShortcuts = {
         default: {
             ctrlKey: true,
             shiftKey: true,
-            key: Key.H,
+            key: Key.J,
         },
         displayName: _td("keyboard|toggle_hidden_events"),
     },
