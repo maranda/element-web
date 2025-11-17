@@ -24,7 +24,6 @@ import {
 import MessageComposer from "../../../../../src/components/views/rooms/MessageComposer";
 import MatrixClientContext from "../../../../../src/contexts/MatrixClientContext";
 import { MatrixClientPeg } from "../../../../../src/MatrixClientPeg";
-import { type IRoomState } from "../../../../../src/components/structures/RoomView";
 import ResizeNotifier from "../../../../../src/utils/ResizeNotifier";
 import { RoomPermalinkCreator } from "../../../../../src/utils/permalinks/Permalinks";
 import { LocalRoom } from "../../../../../src/models/LocalRoom";
@@ -36,6 +35,7 @@ import { addTextToComposerRTL } from "../../../../test-utils/composer";
 import UIStore, { UI_EVENTS } from "../../../../../src/stores/UIStore";
 import { Action } from "../../../../../src/dispatcher/actions";
 import { ScopedRoomContextProvider } from "../../../../../src/contexts/ScopedRoomContext.tsx";
+import type { RoomContextType } from "../../../../../src/contexts/RoomContext.ts";
 
 const openStickerPicker = async (): Promise<void> => {
     await userEvent.click(screen.getByLabelText("More options"));
@@ -125,12 +125,12 @@ describe("MessageComposer", () => {
 
         it("Renders a SendMessageComposer and MessageComposerButtons by default", () => {
             wrapAndRender({ room });
-            expect(screen.getByLabelText("Send a message…")).toBeInTheDocument();
+            expect(screen.getByLabelText("Send an unencrypted message…")).toBeInTheDocument();
         });
 
         it("Does not render a SendMessageComposer or MessageComposerButtons when user has no permission", () => {
             wrapAndRender({ room }, false);
-            expect(screen.queryByLabelText("Send a message…")).not.toBeInTheDocument();
+            expect(screen.queryByLabelText("Send an unencrypted message…")).not.toBeInTheDocument();
             expect(screen.getByText("You do not have permission to post to this room")).toBeInTheDocument();
         });
 
@@ -150,12 +150,12 @@ describe("MessageComposer", () => {
                 }),
             );
 
-            expect(screen.queryByLabelText("Send a message…")).not.toBeInTheDocument();
+            expect(screen.queryByLabelText("Send an unencrypted message…")).not.toBeInTheDocument();
             expect(screen.getByText("This room has been replaced and is no longer active.")).toBeInTheDocument();
         });
 
         describe("when receiving a »reply_to_event«", () => {
-            let roomContext: IRoomState;
+            let roomContext: RoomContextType;
             let resizeNotifier: ResizeNotifier;
 
             beforeEach(() => {
@@ -336,7 +336,7 @@ describe("MessageComposer", () => {
         describe("when not replying to an event", () => {
             it("should pass the expected placeholder to SendMessageComposer", () => {
                 wrapAndRender({ room });
-                expect(screen.getByLabelText("Send a message…")).toBeInTheDocument();
+                expect(screen.getByLabelText("Send an unencrypted message…")).toBeInTheDocument();
             });
 
             it("and an e2e status it should pass the expected placeholder to SendMessageComposer", () => {
@@ -344,7 +344,7 @@ describe("MessageComposer", () => {
                     room,
                     e2eStatus: E2EStatus.Normal,
                 });
-                expect(screen.getByLabelText("Send an encrypted message…")).toBeInTheDocument();
+                expect(screen.getByLabelText("Send a message…")).toBeInTheDocument();
             });
         });
 
@@ -380,12 +380,12 @@ describe("MessageComposer", () => {
             });
 
             describe("without encryption", () => {
-                checkPlaceholder("Send a reply…");
+                checkPlaceholder("Send an unencrypted reply…");
             });
 
             describe("with encryption", () => {
                 setEncrypted();
-                checkPlaceholder("Send an encrypted reply…");
+                checkPlaceholder("Send a reply…");
             });
 
             describe("with a non-thread relation", () => {
@@ -393,7 +393,7 @@ describe("MessageComposer", () => {
                     props.relation = { rel_type: "test" };
                 });
 
-                checkPlaceholder("Send a reply…");
+                checkPlaceholder("Send an unencrypted reply…");
             });
 
             describe("that is a thread", () => {
@@ -401,11 +401,11 @@ describe("MessageComposer", () => {
                     props.relation = { rel_type: THREAD_RELATION_TYPE.name };
                 });
 
-                checkPlaceholder("Reply to thread…");
+                checkPlaceholder("Reply to unencrypted thread…");
 
                 describe("with encryption", () => {
                     setEncrypted();
-                    checkPlaceholder("Reply to encrypted thread…");
+                    checkPlaceholder("Reply to thread…");
                 });
             });
         });
@@ -458,7 +458,7 @@ function wrapAndRender(
         canSendMessages,
         tombstone,
         narrow,
-    } as unknown as IRoomState;
+    } as unknown as RoomContextType;
 
     const defaultProps = {
         room,

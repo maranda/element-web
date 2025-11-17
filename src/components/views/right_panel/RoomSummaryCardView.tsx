@@ -39,6 +39,7 @@ import ErrorIcon from "@vector-im/compound-design-tokens/assets/web/icons/error"
 import ErrorSolidIcon from "@vector-im/compound-design-tokens/assets/web/icons/error-solid";
 import ChevronDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-down";
 import { JoinRule, type Room } from "matrix-js-sdk/src/matrix";
+import { Box, Flex } from "@element-hq/web-shared-components";
 
 import BaseCard from "./BaseCard.tsx";
 import { _t } from "../../../languageHandler.tsx";
@@ -46,10 +47,7 @@ import RoomAvatar from "../avatars/RoomAvatar.tsx";
 import { E2EStatus } from "../../../utils/ShieldUtils.ts";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks.ts";
 import RoomName from "../elements/RoomName.tsx";
-import { Flex } from "../../utils/Flex.tsx";
 import { Linkify, topicToHtml } from "../../../HtmlUtils.tsx";
-import { Box } from "../../utils/Box.tsx";
-import { ReleaseAnnouncement } from "../../structures/ReleaseAnnouncement.tsx";
 import { useRoomSummaryCardViewModel } from "../../viewmodels/right_panel/RoomSummaryCardViewModel.tsx";
 import { useRoomTopicViewModel } from "../../viewmodels/right_panel/RoomSummaryCardTopicViewModel.tsx";
 
@@ -80,7 +78,7 @@ const RoomTopic: React.FC<Pick<IProps, "room">> = ({ room }): JSX.Element | null
                 gap="var(--cpd-space-2x)"
                 className="mx_RoomSummaryCard_topic"
             >
-                <Box flex="1">
+                <Box flex="1" className="mx_RoomSummaryCard_topic_box">
                     <Link kind="primary" onClick={vm.onEditClick}>
                         <Text size="sm" weight="regular">
                             {_t("right_panel|add_topic")}
@@ -103,7 +101,7 @@ const RoomTopic: React.FC<Pick<IProps, "room">> = ({ room }): JSX.Element | null
                 mx_RoomSummaryCard_topic_collapsed: !vm.expanded,
             })}
         >
-            <Box flex="1" className="mx_RoomSummaryCard_topic_container">
+            <Box flex="1" className="mx_RoomSummaryCard_topic_container mx_RoomSummaryCard_topic_box">
                 <Text size="sm" weight="regular" onClick={vm.onTopicLinkClick}>
                     {content}
                 </Text>
@@ -169,8 +167,8 @@ const RoomSummaryCardView: React.FC<IProps> = ({
 
             <Flex as="section" justify="center" gap="var(--cpd-space-2x)" className="mx_RoomSummaryCard_badges">
                 {!vm.isDirectMessage && vm.roomJoinRule === JoinRule.Public && (
-                    <Badge kind="grey">
-                        <PublicIcon width="1em" />
+                    <Badge kind="blue">
+                        <PublicIcon width="1em" color="var(--cpd-color-icon-info-primary)" />
                         {_t("common|public_room")}
                     </Badge>
                 )}
@@ -183,8 +181,8 @@ const RoomSummaryCardView: React.FC<IProps> = ({
                 )}
 
                 {!vm.isRoomEncrypted && (
-                    <Badge kind="grey">
-                        <LockOffIcon width="1em" />
+                    <Badge kind="blue">
+                        <LockOffIcon width="1em" color="var(--cpd-color-icon-info-primary)" />
                         {_t("common|unencrypted")}
                     </Badge>
                 )}
@@ -251,25 +249,15 @@ const RoomSummaryCardView: React.FC<IProps> = ({
                 <MenuItem Icon={ThreadsIcon} label={_t("common|threads")} onSelect={vm.onRoomThreadsClick} />
                 {!vm.isVideoRoom && (
                     <>
-                        <ReleaseAnnouncement
-                            feature="pinningMessageList"
-                            header={_t("right_panel|pinned_messages|release_announcement|title")}
-                            description={_t("right_panel|pinned_messages|release_announcement|description")}
-                            closeLabel={_t("right_panel|pinned_messages|release_announcement|close")}
-                            placement="top"
+                        <MenuItem
+                            Icon={PinIcon}
+                            label={_t("right_panel|pinned_messages_button")}
+                            onSelect={vm.onRoomPinsClick}
                         >
-                            <div>
-                                <MenuItem
-                                    Icon={PinIcon}
-                                    label={_t("right_panel|pinned_messages_button")}
-                                    onSelect={vm.onRoomPinsClick}
-                                >
-                                    <Text as="span" size="sm">
-                                        {vm.pinCount}
-                                    </Text>
-                                </MenuItem>
-                            </div>
-                        </ReleaseAnnouncement>
+                            <Text as="span" size="sm">
+                                {vm.pinCount}
+                            </Text>
+                        </MenuItem>
                         <MenuItem
                             Icon={FilesIcon}
                             label={_t("right_panel|files_button")}

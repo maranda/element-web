@@ -8,31 +8,37 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { fireEvent, render, screen, within } from "jest-matrix-react";
-import { JoinRule, MatrixError, Preset, Visibility } from "matrix-js-sdk/src/matrix";
+import { type Room, JoinRule, MatrixError, Preset, Visibility } from "matrix-js-sdk/src/matrix";
 
 import CreateRoomDialog from "../../../../../src/components/views/dialogs/CreateRoomDialog";
-import { flushPromises, getMockClientWithEventEmitter, mockClientMethodsUser } from "../../../../test-utils";
+import { flushPromises, getMockClientWithEventEmitter, mkSpace, mockClientMethodsUser } from "../../../../test-utils";
 import SettingsStore from "../../../../../src/settings/SettingsStore";
+import { UIFeature } from "../../../../../src/settings/UIFeature";
 
 describe("<CreateRoomDialog />", () => {
     const userId = "@alice:server.org";
-    const mockClient = getMockClientWithEventEmitter({
-        ...mockClientMethodsUser(userId),
-        getDomain: jest.fn().mockReturnValue("server.org"),
-        getClientWellKnown: jest.fn(),
-        doesServerForceEncryptionForPreset: jest.fn(),
-        // make every alias available
-        getRoomIdForAlias: jest.fn().mockRejectedValue(new MatrixError({ errcode: "M_NOT_FOUND" })),
-    });
 
     const getE2eeEnableToggleInputElement = () => screen.getByLabelText("Enable end-to-end encryption");
     // labelled toggle switch doesn't set the disabled attribute, only aria-disabled
     const getE2eeEnableToggleIsDisabled = () =>
         getE2eeEnableToggleInputElement().getAttribute("aria-disabled") === "true";
 
+    let mockClient: ReturnType<typeof getMockClientWithEventEmitter>;
     beforeEach(() => {
+        mockClient = getMockClientWithEventEmitter({
+            ...mockClientMethodsUser(userId),
+            getDomain: jest.fn().mockReturnValue("server.org"),
+            getClientWellKnown: jest.fn(),
+            doesServerForceEncryptionForPreset: jest.fn(),
+            // make every alias available
+            getRoomIdForAlias: jest.fn().mockRejectedValue(new MatrixError({ errcode: "M_NOT_FOUND" })),
+        });
         mockClient.doesServerForceEncryptionForPreset.mockResolvedValue(false);
         mockClient.getClientWellKnown.mockReturnValue({});
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     const getComponent = (props = {}) => render(<CreateRoomDialog onFinished={jest.fn()} {...props} />);
@@ -50,6 +56,55 @@ describe("<CreateRoomDialog />", () => {
         await flushPromises();
 
         expect(screen.getByLabelText("Name")).toHaveDisplayValue(defaultName);
+    });
+
+    it("should include topic in room creation options", async () => {
+        const onFinished = jest.fn();
+        render(<CreateRoomDialog onFinished={onFinished} />);
+        await flushPromises();
+
+        const topic = "This is a test topic";
+
+        // Set room name and topic.
+        fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Room with topic" } });
+        fireEvent.change(screen.getByLabelText("Topic (optional)"), { target: { value: topic } });
+
+        // Create the room.
+        fireEvent.click(screen.getByText("Create room"));
+        await flushPromises();
+
+        expect(onFinished).toHaveBeenCalledWith(
+            true,
+            expect.objectContaining({
+                name: "Room with topic",
+                topic,
+            }),
+        );
+    });
+
+    it("should include no federate option in room creation options when enabled", async () => {
+        const onFinished = jest.fn();
+        render(<CreateRoomDialog onFinished={onFinished} />);
+        await flushPromises();
+
+        // Set room name, and disable federation.
+        fireEvent.change(screen.getByLabelText("Name"), { target: { value: "NoFederate Room" } });
+        fireEvent.click(screen.getByLabelText("Block anyone not part of server.org from ever joining this room."));
+
+        fireEvent.click(screen.getByText("Create room"));
+        await flushPromises();
+
+        expect(onFinished).toHaveBeenCalledWith(
+            true,
+            expect.objectContaining({
+                name: "NoFederate Room",
+                createOpts: expect.objectContaining({
+                    creation_content: expect.objectContaining({
+                        "m.federate": false,
+                    }),
+                }),
+            }),
+        );
     });
 
     describe("for a private room", () => {
@@ -181,8 +236,9 @@ describe("<CreateRoomDialog />", () => {
 
         it("should create a private room", async () => {
             const onFinished = jest.fn();
-            getComponent({ onFinished });
+            const { asFragment } = getComponent({ onFinished });
             await flushPromises();
+            expect(asFragment()).toMatchSnapshot();
 
             const roomName = "Test Room Name";
             fireEvent.change(screen.getByLabelText("Name"), { target: { value: roomName } });
@@ -191,13 +247,21 @@ describe("<CreateRoomDialog />", () => {
             await flushPromises();
 
             expect(onFinished).toHaveBeenCalledWith(true, {
-                createOpts: {
-                    name: roomName,
-                },
+                createOpts: {},
+                name: roomName,
                 encryption: true,
                 parentSpace: undefined,
                 roomType: undefined,
             });
+        });
+
+        it("should render not the advanced options when UI.advancedSettings is disabled", async () => {
+            jest.spyOn(SettingsStore, "getValue").mockImplementation(
+                (setting) => setting !== UIFeature.AdvancedSettings,
+            );
+            const { asFragment } = getComponent();
+            await flushPromises();
+            expect(asFragment()).toMatchSnapshot();
         });
     });
 
@@ -243,9 +307,9 @@ describe("<CreateRoomDialog />", () => {
                 await flushPromises();
                 expect(onFinished).toHaveBeenCalledWith(true, {
                     createOpts: {
-                        name: roomName,
                         visibility: Visibility.Private,
                     },
+                    name: roomName,
                     encryption: true,
                     joinRule: JoinRule.Knock,
                     parentSpace: undefined,
@@ -261,9 +325,9 @@ describe("<CreateRoomDialog />", () => {
                 await flushPromises();
                 expect(onFinished).toHaveBeenCalledWith(true, {
                     createOpts: {
-                        name: roomName,
                         visibility: Visibility.Public,
                     },
+                    name: roomName,
                     encryption: true,
                     joinRule: JoinRule.Knock,
                     parentSpace: undefined,
@@ -333,15 +397,111 @@ describe("<CreateRoomDialog />", () => {
 
             expect(onFinished).toHaveBeenCalledWith(true, {
                 createOpts: {
-                    name: roomName,
                     preset: Preset.PublicChat,
                     room_alias_name: roomAlias,
                     visibility: Visibility.Public,
                 },
+                name: roomName,
                 guestAccess: false,
                 parentSpace: undefined,
                 roomType: undefined,
             });
+        });
+    });
+
+    describe("for a room in a space", () => {
+        let parentSpace: Room;
+        beforeEach(() => {
+            parentSpace = mkSpace(mockClient, "!space:server") as unknown as Room;
+        });
+
+        it("should create a room with restricted join rule when selected", async () => {
+            const onFinished = jest.fn();
+            render(<CreateRoomDialog parentSpace={parentSpace} onFinished={onFinished} />);
+            await flushPromises();
+
+            // Set room name and visibility.
+            fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Restricted Room" } });
+            fireEvent.click(screen.getByLabelText("Room visibility"));
+            fireEvent.click(screen.getByRole("option", { name: "Visible to space members" }));
+
+            fireEvent.click(screen.getByText("Create room"));
+            await flushPromises();
+
+            expect(onFinished).toHaveBeenCalledWith(
+                true,
+                expect.objectContaining({
+                    name: "Restricted Room",
+                    joinRule: JoinRule.Restricted,
+                }),
+            );
+        });
+
+        it("should create a room with public join rule when selected", async () => {
+            const onFinished = jest.fn();
+            render(<CreateRoomDialog parentSpace={parentSpace} onFinished={onFinished} />);
+            await flushPromises();
+
+            // Set room name and visibility. Rooms in spaces also need an address.
+            fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Public Room" } });
+            fireEvent.click(screen.getByLabelText("Room visibility"));
+            fireEvent.click(screen.getByRole("option", { name: "Public room" }));
+            fireEvent.change(screen.getByLabelText("Room address"), { target: { value: "testroom" } });
+
+            // Create the room.
+            fireEvent.click(screen.getByText("Create room"));
+            await flushPromises();
+
+            expect(onFinished).toHaveBeenCalledWith(
+                true,
+                expect.objectContaining({
+                    name: "Public Room",
+                    createOpts: expect.objectContaining({
+                        room_alias_name: "testroom",
+                        visibility: Visibility.Public,
+                        preset: Preset.PublicChat,
+                    }),
+                    guestAccess: false,
+                    roomType: undefined,
+                }),
+            );
+        });
+    });
+
+    describe("keyboard shortcuts", () => {
+        it("should submit the form when Enter is pressed", async () => {
+            const onFinished = jest.fn();
+            render(<CreateRoomDialog onFinished={onFinished} />);
+            await flushPromises();
+
+            // Simulate pressing the Enter key.
+            fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Keyboard Room" } });
+            fireEvent.keyDown(screen.getByLabelText("Name"), { key: "Enter", code: "Enter", charCode: 13 });
+
+            await flushPromises();
+
+            expect(onFinished).toHaveBeenCalledWith(
+                true,
+                expect.objectContaining({
+                    name: "Keyboard Room",
+                }),
+            );
+        });
+
+        it("should cancel the dialog when Escape is pressed", async () => {
+            const onFinished = jest.fn();
+            render(<CreateRoomDialog onFinished={onFinished} />);
+            await flushPromises();
+
+            // Simulate pressing the Escape key.
+            fireEvent.keyDown(screen.getByLabelText("Name"), { key: "Escape", code: "Escape", charCode: 27 });
+
+            await flushPromises();
+
+            // BaseDialog passes no arguments, but DialogButtons pass false - might not be desirable?
+            expect(onFinished).toHaveBeenCalled();
+            const callArgs = onFinished.mock.calls[0];
+            expect(callArgs.length === 0 || callArgs[0] === false).toBe(true);
         });
     });
 });

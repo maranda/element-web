@@ -11,6 +11,7 @@ import { test, expect } from "../../element-web-test";
 import type { Preset, ICreateRoomOpts } from "matrix-js-sdk/src/matrix";
 import { type ElementAppPage } from "../../pages/ElementAppPage";
 import { isDendrite } from "../../plugins/homeserver/dendrite";
+import { UIFeature } from "../../../src/settings/UIFeature";
 
 async function openSpaceCreateMenu(page: Page): Promise<Locator> {
     await page.getByRole("button", { name: "Create a space" }).click();
@@ -23,7 +24,7 @@ async function openSpaceContextMenu(page: Page, app: ElementAppPage, spaceName: 
     return page.locator(".mx_SpacePanel_contextMenu");
 }
 
-function spaceCreateOptions(spaceName: string, roomIds: string[] = []): ICreateRoomOpts {
+function spaceCreateOptions(serverName: string, spaceName: string, roomIds: string[] = []): ICreateRoomOpts {
     return {
         creation_content: {
             type: "m.space",
@@ -35,17 +36,21 @@ function spaceCreateOptions(spaceName: string, roomIds: string[] = []): ICreateR
                     name: spaceName,
                 },
             },
-            ...roomIds.map((r) => spaceChildInitialState(r)),
+            ...roomIds.map((r) => spaceChildInitialState(serverName, r)),
         ],
     };
 }
 
-function spaceChildInitialState(roomId: string, order?: string): ICreateRoomOpts["initial_state"]["0"] {
+function spaceChildInitialState(
+    serverName: string,
+    roomId: string,
+    order?: string,
+): ICreateRoomOpts["initial_state"]["0"] {
     return {
         type: "m.space.child",
         state_key: roomId,
         content: {
-            via: [roomId.split(":")[1]],
+            via: [serverName],
             order,
         },
     };
@@ -91,9 +96,9 @@ test.describe("Spaces", () => {
             await page.getByRole("button", { name: "Go to my first room" }).click();
 
             // Assert rooms exist in the room list
-            await expect(page.getByRole("treeitem", { name: "General" })).toBeVisible();
-            await expect(page.getByRole("treeitem", { name: "Random" })).toBeVisible();
-            await expect(page.getByRole("treeitem", { name: "Jokes" })).toBeVisible();
+            await expect(page.getByRole("option", { name: "General" })).toBeVisible();
+            await expect(page.getByRole("option", { name: "Random" })).toBeVisible();
+            await expect(page.getByRole("option", { name: "Jokes" })).toBeVisible();
         },
     );
 
@@ -122,10 +127,10 @@ test.describe("Spaces", () => {
         await page.getByRole("button", { name: "Skip for now" }).click();
 
         // Assert rooms exist in the room list
-        const roomList = page.getByRole("tree", { name: "Rooms" });
-        await expect(roomList.getByRole("treeitem", { name: "General", exact: true })).toBeVisible();
-        await expect(roomList.getByRole("treeitem", { name: "Random", exact: true })).toBeVisible();
-        await expect(roomList.getByRole("treeitem", { name: "Projects", exact: true })).toBeVisible();
+        const roomList = page.getByRole("listbox", { name: "Room list", exact: true });
+        await expect(roomList.getByRole("option", { name: "General" })).toBeVisible();
+        await expect(roomList.getByRole("option", { name: "Random" })).toBeVisible();
+        await expect(roomList.getByRole("option", { name: "Projects" })).toBeVisible();
 
         // Assert rooms exist in the space explorer
         await expect(
@@ -195,7 +200,7 @@ test.describe("Spaces", () => {
 
             await page.getByRole("button", { name: "Skip for now" }).click();
 
-            await page.getByRole("button", { name: "Add room" }).click();
+            await page.getByRole("main").getByRole("button", { name: "Add" }).click();
             await page.getByRole("menuitem", { name: "Add existing room" }).click();
 
             await page.getByRole("checkbox", { name: "Sample Room" }).click();
@@ -240,7 +245,7 @@ test.describe("Spaces", () => {
         });
         await expect(await app.getSpacePanelButton("My Space")).toBeVisible();
 
-        const roomId = await bot.createRoom(spaceCreateOptions("Space Space"));
+        const roomId = await bot.createRoom(spaceCreateOptions(user.homeServer, "Space Space"));
         await bot.inviteUser(roomId, user.userId);
 
         // Assert that `Space Space` is above `My Space` due to it being an invite
@@ -260,7 +265,10 @@ test.describe("Spaces", () => {
         const spaceName = "Spacey Mc. Space Space";
         await app.client.createSpace({
             name: spaceName,
-            initial_state: [spaceChildInitialState(roomId1), spaceChildInitialState(roomId2)],
+            initial_state: [
+                spaceChildInitialState(user.homeServer, roomId1),
+                spaceChildInitialState(user.homeServer, roomId2),
+            ],
         });
 
         await app.viewSpaceHomeByName(spaceName);
@@ -287,7 +295,7 @@ test.describe("Spaces", () => {
             });
             await app.client.createSpace({
                 name: "Root Space",
-                initial_state: [spaceChildInitialState(childSpaceId)],
+                initial_state: [spaceChildInitialState(user.homeServer, childSpaceId)],
             });
 
             // Find collapsed Space panel
@@ -323,7 +331,7 @@ test.describe("Spaces", () => {
             name: "Test Room",
             topic: "This is a topic https://github.com/matrix-org/matrix-react-sdk/pull/10060 with a link",
         });
-        const spaceId = await bot.createRoom(spaceCreateOptions("Test Space", [roomId]));
+        const spaceId = await bot.createRoom(spaceCreateOptions(user.homeServer, "Test Space", [roomId]));
         await bot.inviteUser(spaceId, user.userId);
 
         await expect(await app.getSpacePanelButton("Test Space")).toBeVisible();
@@ -361,12 +369,76 @@ test.describe("Spaces", () => {
         await app.client.createSpace({
             name: "Root Space",
             initial_state: [
-                spaceChildInitialState(childSpaceId1, "a"),
-                spaceChildInitialState(childSpaceId2, "b"),
-                spaceChildInitialState(childSpaceId3, "c"),
+                spaceChildInitialState(user.homeServer, childSpaceId1, "a"),
+                spaceChildInitialState(user.homeServer, childSpaceId2, "b"),
+                spaceChildInitialState(user.homeServer, childSpaceId3, "c"),
             ],
         });
         await app.viewSpaceByName("Root Space");
         await expect(page.locator(".mx_SpaceRoomView")).toMatchScreenshot("space-room-view.png");
+    });
+
+    test("should render spaces visibility settings", { tag: "@screenshot" }, async ({ page, app, user, axe }) => {
+        await app.client.createSpace({
+            name: "My Space",
+        });
+        await app.viewSpaceByName("My space");
+        await page.getByLabel("Settings", { exact: true }).click();
+        await app.settings.switchTab("Visibility");
+
+        axe.disableRules("color-contrast"); // XXX: Inheriting colour contrast issues from room view.
+        await expect(axe).toHaveNoViolations();
+        await expect(page.locator("#mx_tabpanel_SPACE_VISIBILITY_TAB")).toMatchScreenshot(
+            "space-visibility-settings.png",
+        );
+    });
+
+    test.describe("Should hide public spaces option if not allowed", () => {
+        test.use({
+            config: {
+                setting_defaults: {
+                    [UIFeature.AllowCreatingPublicSpaces]: false,
+                },
+            },
+        });
+
+        test("should disallow creating public rooms", { tag: "@screenshot" }, async ({ page, user, app }) => {
+            const menu = await openSpaceCreateMenu(page);
+            await menu
+                .locator('.mx_SpaceBasicSettings_avatarContainer input[type="file"]')
+                .setInputFiles("playwright/sample-files/riot.png");
+            await menu.getByRole("textbox", { name: "Name" }).fill("This is a private space");
+            await expect(menu.getByRole("textbox", { name: "Address" })).not.toBeVisible();
+            await menu
+                .getByRole("textbox", { name: "Description" })
+                .fill("This is a private space because we can't make public ones");
+            await menu.getByRole("button", { name: "Create" }).click();
+
+            await page.getByRole("button", { name: "Me and my teammates" }).click();
+
+            // Create the default General & Random rooms, as well as a custom "Projects" room
+            await expect(page.getByPlaceholder("General")).toBeVisible();
+            await expect(page.getByPlaceholder("Random")).toBeVisible();
+            await page.getByPlaceholder("Support").fill("Projects");
+            await page.getByRole("button", { name: "Continue" }).click();
+            await page.getByRole("button", { name: "Skip for now" }).click();
+
+            // Assert rooms exist in the room list
+            const roomList = page.getByRole("listbox", { name: "Room list", exact: true });
+            await expect(roomList.getByRole("option", { name: "General" })).toBeVisible();
+            await expect(roomList.getByRole("option", { name: "Random" })).toBeVisible();
+            await expect(roomList.getByRole("option", { name: "Projects" })).toBeVisible();
+
+            // Assert rooms exist in the space explorer
+            await expect(
+                page.locator(".mx_SpaceHierarchy_list .mx_SpaceHierarchy_roomTile", { hasText: "General" }),
+            ).toBeVisible();
+            await expect(
+                page.locator(".mx_SpaceHierarchy_list .mx_SpaceHierarchy_roomTile", { hasText: "Random" }),
+            ).toBeVisible();
+            await expect(
+                page.locator(".mx_SpaceHierarchy_list .mx_SpaceHierarchy_roomTile", { hasText: "Projects" }),
+            ).toBeVisible();
+        });
     });
 });

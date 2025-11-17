@@ -4,7 +4,6 @@
 /key.pem
 /lib
 /node_modules
-/packages/
 /webapp
 /.npmrc
 /*.log
@@ -35,3 +34,7 @@ electron/pub
 
 *storybook.log
 storybook-static
+
+/packages/shared-components/node_modules
+/packages/shared-components/dist
+/packages/shared-components/src/i18nKeys.d.ts

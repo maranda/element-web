@@ -30,6 +30,9 @@ import { ModuleRunner } from "../modules/ModuleRunner";
 import { parseQs } from "./url_utils";
 import { getInitialScreenAfterLogin, getScreenFromLocation, init as initRouting, onNewScreen } from "./routing";
 import { UserFriendlyError } from "../languageHandler";
+import { ModuleApi } from "../modules/Api";
+import { RoomView } from "../components/structures/RoomView";
+import RoomAvatar from "../components/views/avatars/RoomAvatar";
 
 logger.log(`Application is running in ${process.env.NODE_ENV} mode`);
 
@@ -43,6 +46,7 @@ function onTokenLoginCompleted(): void {
     // a little nasty but let's redirect to clear them.
     const url = new URL(window.location.href);
 
+    url.searchParams.delete("no_universal_links");
     url.searchParams.delete("loginToken");
     url.searchParams.delete("state");
     url.searchParams.delete("code");
@@ -52,6 +56,10 @@ function onTokenLoginCompleted(): void {
 }
 
 export async function loadApp(fragParams: QueryDict, matrixChatRef: React.Ref<MatrixChat>): Promise<ReactElement> {
+    // XXX: This lives here because certain components import so many things that importing it in a sensible place (eg.
+    // the builtins module or init.tsx) causes a circular dependency.
+    ModuleApi.instance.builtins.setComponents({ roomView: RoomView, roomAvatar: RoomAvatar });
+
     initRouting();
     const platform = PlatformPeg.get();
 

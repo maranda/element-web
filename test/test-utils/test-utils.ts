@@ -204,6 +204,7 @@ export function createTestClient(): MatrixClient {
         sendTyping: jest.fn().mockResolvedValue({}),
         sendMessage: jest.fn().mockResolvedValue({}),
         sendStateEvent: jest.fn().mockResolvedValue(undefined),
+        sendRtcDecline: jest.fn().mockResolvedValue(undefined),
         getSyncState: jest.fn().mockReturnValue("SYNCING"),
         generateClientSecret: () => "t35tcl1Ent5ECr3T",
         isGuest: jest.fn().mockReturnValue(false),
@@ -649,6 +650,7 @@ export function mkStubRoom(
         getJoinedMembers: jest.fn().mockReturnValue([]),
         getLiveTimeline: jest.fn().mockReturnValue(stubTimeline),
         getLastLiveEvent: jest.fn().mockReturnValue(undefined),
+        getLastActiveTimestamp: jest.fn().mockReturnValue(1183140000),
         getMember: jest.fn().mockReturnValue({
             userId: "@member:domain.bla",
             name: "Member",

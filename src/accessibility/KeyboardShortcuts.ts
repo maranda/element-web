@@ -9,7 +9,8 @@ Please see LICENSE files in the repository root for full details.
 */
 
 // Import i18n.tsx instead of languageHandler to avoid circular deps
-import { _td, type TranslationKey } from "../shared-components/i18n";
+import { _td, type TranslationKey } from "@element-hq/web-shared-components";
+
 import { IS_MAC, IS_ELECTRON, Key } from "../Keyboard";
 import { type IBaseSetting } from "../settings/Settings";
 import { type KeyCombo } from "../KeyBindingsManager";
@@ -146,6 +147,7 @@ export enum KeyBindingAction {
     ArrowDown = "KeyBinding.arrowDown",
     Tab = "KeyBinding.tab",
     Comma = "KeyBinding.comma",
+    Save = "KeyBinding.save",
 
     /** Toggle visibility of hidden events */
     ToggleHiddenEventVisibility = "KeyBinding.toggleHiddenEventVisibility",
@@ -269,6 +271,7 @@ export const CATEGORIES: Record<CategoryName, ICategory> = {
             KeyBindingAction.ArrowRight,
             KeyBindingAction.ArrowDown,
             KeyBindingAction.Comma,
+            KeyBindingAction.Save,
         ],
     },
     [CategoryName.NAVIGATION]: {
@@ -620,6 +623,13 @@ export const KEYBOARD_SHORTCUTS: IKeyboardShortcuts = {
             shiftKey: IS_MAC,
         },
         displayName: _td("keyboard|composer_redo"),
+    },
+    [KeyBindingAction.Save]: {
+        default: {
+            key: Key.S,
+            ctrlOrCmdKey: true,
+        },
+        displayName: _td("keyboard|save"),
     },
     [KeyBindingAction.PreviousVisitedRoomOrSpace]: {
         default: {

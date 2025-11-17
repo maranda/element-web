@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`AppTile destroys non-persisted right panel widget on room change 1`] = `
 <DocumentFragment>
@@ -16,11 +16,11 @@ exports[`AppTile destroys non-persisted right panel widget on room change 1`] = 
         <div
           class="mx_BaseCard_header_title"
         >
-          <h4
+          <h1
             class="mx_Heading_h4 mx_BaseCard_header_title_heading"
           >
             Example 1
-          </h4>
+          </h1>
           <div
             aria-expanded="false"
             aria-haspopup="true"
@@ -31,7 +31,7 @@ exports[`AppTile destroys non-persisted right panel widget on room change 1`] = 
           />
         </div>
         <button
-          aria-labelledby="«r0»"
+          aria-labelledby="_r_0_"
           class="_icon-button_1pz9o_8"
           data-kind="secondary"
           data-testid="base-card-close-button"
@@ -107,6 +107,7 @@ exports[`AppTile for a pinned widget should render 1`] = `
             data-color="1"
             data-testid="avatar-img"
             data-type="round"
+            role="img"
             style="--cpd-avatar-size: 20px;"
           >
             <img
@@ -120,9 +121,9 @@ exports[`AppTile for a pinned widget should render 1`] = `
               width="20px"
             />
           </span>
-          <h3>
+          <h1>
             Example 1
-          </h3>
+          </h1>
           <span />
         </span>
       </span>
@@ -219,6 +220,7 @@ exports[`AppTile for a pinned widget should render permission request 1`] = `
             data-color="1"
             data-testid="avatar-img"
             data-type="round"
+            role="img"
             style="--cpd-avatar-size: 20px;"
           >
             <img
@@ -232,9 +234,9 @@ exports[`AppTile for a pinned widget should render permission request 1`] = `
               width="20px"
             />
           </span>
-          <h3>
+          <h1>
             Example 1
-          </h3>
+          </h1>
           <span />
         </span>
       </span>
@@ -338,8 +340,8 @@ exports[`AppTile for a pinned widget should render permission request 1`] = `
             <span>
               Using this widget may share data 
               <div
-                aria-describedby="«r2j»"
-                aria-labelledby="«r2i»"
+                aria-describedby="_r_2n_"
+                aria-labelledby="_r_2m_"
                 class="mx_TextWithTooltip_target mx_TextWithTooltip_target--helpIcon"
               >
                 <svg
@@ -410,6 +412,7 @@ exports[`AppTile preserves non-persisted widget on container move 1`] = `
                   data-color="1"
                   data-testid="avatar-img"
                   data-type="round"
+                  role="img"
                   style="--cpd-avatar-size: 20px;"
                 >
                   <img
@@ -423,9 +426,9 @@ exports[`AppTile preserves non-persisted widget on container move 1`] = `
                     width="20px"
                   />
                 </span>
-                <h3>
+                <h1>
                   Example 1
-                </h3>
+                </h1>
                 <span />
               </span>
             </span>

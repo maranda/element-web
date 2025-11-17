@@ -71,6 +71,8 @@ import { SetupEncryptionStore } from "../../../../src/stores/SetupEncryptionStor
 import { ShareFormat } from "../../../../src/dispatcher/payloads/SharePayload.ts";
 import { clearStorage } from "../../../../src/Lifecycle";
 import RoomListStore from "../../../../src/stores/room-list/RoomListStore.ts";
+import UserSettingsDialog from "../../../../src/components/views/dialogs/UserSettingsDialog.tsx";
+import { SdkContextClass } from "../../../../src/contexts/SDKContext.ts";
 
 jest.mock("matrix-js-sdk/src/oidc/authorize", () => ({
     completeAuthorizationCodeGrant: jest.fn(),
@@ -269,6 +271,16 @@ describe("<MatrixChat />", () => {
         act(() => defaultDispatcher.dispatch({ action: Action.OnLoggedOut }, true));
 
         localStorage.clear();
+
+        // This is a massive hack, but ...
+        //
+        // A lot of these tests end up completing while the login flow is still proceeding. So then, we start the next
+        // test while stuff is still ongoing from the previous test, which messes up the current test (by changing
+        // localStorage or opening modals, or whatever).
+        //
+        // There is no obvious event we could wait for which indicates that everything has completed, since each test
+        // does something different. Instead...
+        await act(() => sleep(200));
     });
 
     resetJsDomAfterEach();
@@ -293,6 +305,30 @@ describe("<MatrixChat />", () => {
         await waitFor(() => {
             expect(defaultDispatcher.fire).toHaveBeenCalledWith(Action.FocusThreadsPanel);
         });
+    });
+
+    it("should notify resizenotifier when left panel hidden", async () => {
+        getComponent();
+
+        jest.spyOn(SdkContextClass.instance.resizeNotifier, "notifyLeftHandleResized");
+
+        defaultDispatcher.dispatch({ action: "hide_left_panel" });
+
+        await waitFor(() =>
+            expect(mocked(SdkContextClass.instance.resizeNotifier.notifyLeftHandleResized)).toHaveBeenCalled(),
+        );
+    });
+
+    it("should notify resizenotifier when left panel shown", async () => {
+        getComponent();
+
+        jest.spyOn(SdkContextClass.instance.resizeNotifier, "notifyLeftHandleResized");
+
+        defaultDispatcher.dispatch({ action: "show_left_panel" });
+
+        await waitFor(() =>
+            expect(mocked(SdkContextClass.instance.resizeNotifier.notifyLeftHandleResized)).toHaveBeenCalled(),
+        );
     });
 
     describe("when query params have a OIDC params", () => {
@@ -640,22 +676,29 @@ describe("<MatrixChat />", () => {
         });
 
         describe("onAction()", () => {
-            beforeEach(() => {
-                jest.spyOn(defaultDispatcher, "dispatch").mockClear();
-                jest.spyOn(defaultDispatcher, "fire").mockClear();
+            afterEach(() => {
+                jest.restoreAllMocks();
             });
-            it("should open user device settings", async () => {
+
+            it("ViewUserDeviceSettings should open user device settings", async () => {
                 await getComponentAndWaitForReady();
 
-                defaultDispatcher.dispatch({
-                    action: Action.ViewUserDeviceSettings,
-                });
+                const createDialog = jest.spyOn(Modal, "createDialog").mockReturnValue({} as any);
 
-                await flushPromises();
+                await act(async () => {
+                    defaultDispatcher.dispatch({
+                        action: Action.ViewUserDeviceSettings,
+                    });
 
-                expect(defaultDispatcher.dispatch).toHaveBeenCalledWith({
-                    action: Action.ViewUserSettings,
-                    initialTabId: UserTab.SessionManager,
+                    await waitFor(() =>
+                        expect(createDialog).toHaveBeenCalledWith(
+                            UserSettingsDialog,
+                            { initialTabId: UserTab.SessionManager, sdkContext: expect.any(SdkContextClass) },
+                            /*className=*/ undefined,
+                            /*isPriority=*/ false,
+                            /*isStatic=*/ true,
+                        ),
+                    );
                 });
             });
 
@@ -672,10 +715,8 @@ describe("<MatrixChat />", () => {
                     jest.spyOn(spaceRoom, "isSpaceRoom").mockReturnValue(true);
 
                     jest.spyOn(ReleaseAnnouncementStore.instance, "getReleaseAnnouncement").mockReturnValue(null);
-                });
-
-                afterEach(() => {
-                    jest.restoreAllMocks();
+                    (room as any).client = mockClient;
+                    (spaceRoom as any).client = mockClient;
                 });
 
                 describe("forget_room", () => {
@@ -757,6 +798,22 @@ describe("<MatrixChat />", () => {
                             expect(
                                 screen.getByText(
                                     "This room is not public. You will not be able to rejoin without an invite.",
+                                ),
+                            ).toBeInTheDocument();
+                        });
+                        it("should warn when user is the last admin", async () => {
+                            jest.spyOn(room, "getJoinedMembers").mockReturnValue([
+                                { powerLevel: 100 } as unknown as MatrixJs.RoomMember,
+                                { powerLevel: 0 } as unknown as MatrixJs.RoomMember,
+                            ]);
+                            jest.spyOn(room, "getMember").mockReturnValue({
+                                powerLevel: 100,
+                            } as unknown as MatrixJs.RoomMember);
+                            dispatchAction();
+                            await screen.findByRole("dialog");
+                            expect(
+                                screen.getByText(
+                                    "You're the only administrator in this room. If you leave, nobody will be able to change room settings or take other important actions.",
                                 ),
                             ).toBeInTheDocument();
                         });
@@ -1048,10 +1105,10 @@ describe("<MatrixChat />", () => {
                 getComponent();
 
                 // Then we are asked to verify our device
-                await screen.findByRole("heading", { name: "Verify this device", level: 1 });
+                await screen.findByRole("heading", { name: "Confirm your identity", level: 2 });
 
                 // Sanity: we are not racing with another screen update, so this heading stays visible
-                await screen.findByRole("heading", { name: "Verify this device", level: 1 });
+                await screen.findByRole("heading", { name: "Confirm your identity", level: 2 });
             });
             it("should not open app after cancelling device verify if unskippable verification is on", async () => {
                 // See https://github.com/element-hq/element-web/issues/29230
@@ -1067,17 +1124,17 @@ describe("<MatrixChat />", () => {
                 // And MatrixChat is rendered
                 getComponent();
 
-                // When we click "Verify with another device"
-                await screen.findByRole("heading", { name: "Verify this device", level: 1 });
-                const verify = screen.getByRole("button", { name: "Verify with another device" });
+                // When we click "Use another device"
+                await screen.findByRole("heading", { name: "Confirm your identity", level: 2 });
+                const verify = screen.getByRole("button", { name: "Use another device" });
                 act(() => verify.click());
 
                 // And close the device verification dialog
-                const closeButton = await screen.findByRole("button", { name: "Close dialog" });
+                const closeButton = screen.getByRole("button", { name: "Close dialog" });
                 act(() => closeButton.click());
 
                 // Then we are not allowed in - we are still being asked to verify
-                await screen.findByRole("heading", { name: "Verify this device", level: 1 });
+                await screen.findByRole("heading", { name: "Confirm your identity", level: 2 });
             });
 
             describe("when query params have a loginToken", () => {
@@ -1120,7 +1177,7 @@ describe("<MatrixChat />", () => {
                     );
 
                     // Then we are not allowed in - we are being asked to verify
-                    await screen.findByRole("heading", { name: "Verify this device", level: 1 });
+                    await screen.findByRole("heading", { name: "Confirm your identity", level: 2 });
                 });
             });
 
@@ -1146,7 +1203,7 @@ describe("<MatrixChat />", () => {
                         .fn()
                         .mockResolvedValue({ signedByOwner: true } as DeviceVerificationStatus),
                     isCrossSigningReady: jest.fn().mockReturnValue(false),
-                    requestOwnUserVerification: jest.fn().mockResolvedValue({ cancel: jest.fn() }),
+                    requestOwnUserVerification: jest.fn().mockResolvedValue({ cancel: jest.fn(), on: jest.fn() }),
                 } as any;
             }
         });
@@ -1364,7 +1421,7 @@ describe("<MatrixChat />", () => {
                 await flushPromises();
 
                 // Complete security begin screen is rendered
-                expect(screen.getByText("Unable to verify this device")).toBeInTheDocument();
+                expect(screen.getByText("Confirm your identity")).toBeInTheDocument();
             });
 
             it("should setup e2e when server supports cross signing", async () => {
@@ -1599,10 +1656,15 @@ describe("<MatrixChat />", () => {
     });
 
     describe("Multi-tab lockout", () => {
+        beforeEach(() => {
+            mockPlatformPeg();
+        });
+
         afterEach(() => {
             Lifecycle.setSessionLockNotStolen();
         });
 
+        // Flaky test, see https://github.com/element-hq/element-web/issues/30337
         it("waits for other tab to stop during startup", async () => {
             fetchMock.get("/welcome.html", { body: "<h1>Hello</h1>" });
             jest.spyOn(Lifecycle, "attemptDelegatedAuthLogin");
@@ -1643,6 +1705,8 @@ describe("<MatrixChat />", () => {
             beforeEach(() => {
                 // make sure we start from a clean DOM for each of these tests
                 document.body.replaceChildren();
+                // use the MockPlatform
+                mockPlatformPeg();
             });
 
             function simulateSessionLockClaim() {

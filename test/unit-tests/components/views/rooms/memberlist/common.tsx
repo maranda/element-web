@@ -9,6 +9,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { act } from "react";
 import { render, type RenderResult, waitFor } from "jest-matrix-react";
+import { VirtuosoMockContext } from "react-virtuoso";
 import {
     Room,
     type MatrixClient,
@@ -107,6 +108,12 @@ export async function renderMemberList(
         members: {},
         getMember: jest.fn(),
         getStateEvents: ((eventType, stateKey) => (stateKey === undefined ? [] : null)) as RoomState["getStateEvents"], // ignore 3pid invites
+        getInvitedMemberCount: jest.fn().mockReturnValue(0),
+        getJoinedMemberCount: jest
+            .fn()
+            .mockReturnValue(adminUsers.length + moderatorUsers.length + defaultUsers.length),
+        on: jest.fn(),
+        off: jest.fn(),
     } as unknown as RoomState;
     for (const member of [...adminUsers, ...moderatorUsers, ...defaultUsers]) {
         memberListRoom.currentState.members[member.userId] = member;
@@ -121,6 +128,13 @@ export async function renderMemberList(
                 <MemberListView roomId={memberListRoom.roomId} onClose={() => {}} />
             </SDKContext.Provider>
         </MatrixClientContext.Provider>,
+        {
+            wrapper: ({ children }) => (
+                <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 56 }}>
+                    <>{children}</>
+                </VirtuosoMockContext.Provider>
+            ),
+        },
     );
     await waitFor(async () => {
         expect(root.container.querySelectorAll(".mx_MemberTileView")).toHaveLength(usersPerLevel * 3);

@@ -18,6 +18,7 @@ import SettingExplorer from "./devtools/SettingExplorer";
 import { RoomStateExplorer } from "./devtools/RoomState";
 import BaseTool, { DevtoolsContext, type IDevtoolsProps } from "./devtools/BaseTool";
 import WidgetExplorer from "./devtools/WidgetExplorer";
+import { UserList } from "./devtools/Users";
 import { AccountDataExplorer, RoomAccountDataExplorer } from "./devtools/AccountData";
 import SettingsFlag from "../elements/SettingsFlag";
 import { SettingLevel } from "../../../settings/SettingLevel";
@@ -46,6 +47,7 @@ const Tools: Record<Category, [label: TranslationKey, tool: Tool][]> = {
         [_td("devtools|view_servers_in_room"), ServersInRoom],
         [_td("devtools|notifications_debug"), RoomNotifications],
         [_td("devtools|active_widgets"), WidgetExplorer],
+        [_td("devtools|users"), UserList],
     ],
     [Category.Other]: [
         [_td("devtools|explore_account_data"), AccountDataExplorer],
@@ -84,7 +86,9 @@ const DevtoolsDialog: React.FC<IProps> = ({ roomId, threadRootId, onFinished }) 
             <BaseTool onBack={onBack}>
                 {Object.entries(Tools).map(([category, tools]) => (
                     <div key={category}>
-                        <h3>{_t(categoryLabels[category as unknown as Category])}</h3>
+                        <h2 className="mx_DevTools_toolHeading">
+                            {_t(categoryLabels[category as unknown as Category])}
+                        </h2>
                         {tools.map(([label, tool]) => {
                             const onClick = (): void => {
                                 setTool([label, tool]);
@@ -98,7 +102,7 @@ const DevtoolsDialog: React.FC<IProps> = ({ roomId, threadRootId, onFinished }) 
                     </div>
                 ))}
                 <div>
-                    <h3>{_t("common|options")}</h3>
+                    <h2 className="mx_DevTools_toolHeading">{_t("common|options")}</h2>
                     <SettingsFlag name="developerMode" level={SettingLevel.ACCOUNT} />
                     <SettingsFlag name="showHiddenEventsInTimeline" level={SettingLevel.DEVICE} />
                     <SettingsFlag name="enableWidgetScreenshots" level={SettingLevel.ACCOUNT} />

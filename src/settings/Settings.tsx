@@ -8,11 +8,11 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type ReactNode } from "react";
-import { UNSTABLE_MSC4133_EXTENDED_PROFILES } from "matrix-js-sdk/src/matrix";
+import { STABLE_MSC4133_EXTENDED_PROFILES, UNSTABLE_MSC4133_EXTENDED_PROFILES } from "matrix-js-sdk/src/matrix";
+// Import these directly from shared-components to avoid circular deps
+import { _t, _td, type TranslationKey } from "@element-hq/web-shared-components";
 
 import { type MediaPreviewConfig } from "../@types/media_preview.ts";
-// Import i18n.tsx instead of languageHandler to avoid circular deps
-import { _t, _td, type TranslationKey } from "../shared-components/i18n";
 import DeviceIsolationModeController from "./controllers/DeviceIsolationModeController.ts";
 import {
     NotificationBodyEnabledController,
@@ -179,6 +179,14 @@ export interface IBaseSetting<T extends SettingValueType = SettingValueType> {
      * Whether the setting should be exported in a rageshake report.
      */
     shouldExportToRageshake?: boolean;
+
+    /**
+     * Options array for a setting controlled by a dropdown.
+     */
+    options?: {
+        value: T;
+        label: TranslationKey;
+    }[];
 }
 
 export interface IFeature extends Omit<IBaseSetting<boolean>, "isFeature"> {
@@ -205,6 +213,7 @@ export interface Settings {
     "feature_mjolnir": IFeature;
     "feature_custom_themes": IFeature;
     "feature_exclude_insecure_devices": IFeature;
+    "feature_share_history_on_invite": IFeature;
     "feature_html_topic": IFeature;
     "feature_bridge_state": IFeature;
     "feature_jump_to_date": IFeature;
@@ -213,7 +222,6 @@ export interface Settings {
     "feature_element_call_video_rooms": IFeature;
     "feature_group_calls": IFeature;
     "feature_disable_call_per_sender_encryption": IFeature;
-    "feature_allow_screen_share_only_mode": IFeature;
     "feature_location_share_live": IFeature;
     "feature_dynamic_room_predecessors": IFeature;
     "feature_render_reaction_images": IFeature;
@@ -352,7 +360,7 @@ export interface Settings {
     "videoInputMuted": IBaseSetting<boolean>;
     "activeCallRoomIds": IBaseSetting<string[]>;
     "releaseAnnouncementData": IBaseSetting<ReleaseAnnouncementData>;
-    "Electron.autoLaunch": IBaseSetting<boolean>;
+    "Electron.autoLaunch": IBaseSetting<"enabled" | "minimised" | "disabled">;
     "Electron.warnBeforeExit": IBaseSetting<boolean>;
     "Electron.alwaysShowMenuBar": IBaseSetting<boolean>;
     "Electron.showTrayIcon": IBaseSetting<boolean>;
@@ -503,6 +511,29 @@ export const SETTINGS: Settings = {
         supportedLevelsAreOrdered: true,
         default: false,
     },
+    "feature_share_history_on_invite": {
+        isFeature: true,
+        labsGroup: LabGroup.Encryption,
+        displayName: _td("labs|share_history_on_invite"),
+        description: () => (
+            <>
+                {_t("labs|share_history_on_invite_description")}
+                <div className="mx_SettingsFlag_microcopy">
+                    {_t(
+                        "settings|warning",
+                        {},
+                        {
+                            w: (sub) => <span className="mx_SettingsTab_microcopy_warning">{sub}</span>,
+                            description: _t("labs|share_history_on_invite_warning"),
+                        },
+                    )}
+                </div>
+            </>
+        ),
+        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG_PRIORITISED,
+        supportedLevelsAreOrdered: true,
+        default: false,
+    },
     "useOnlyCurrentProfiles": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
         displayName: _td("settings|disable_historical_profile"),
@@ -612,16 +643,6 @@ export const SETTINGS: Settings = {
         displayName: _td("labs|feature_disable_call_per_sender_encryption"),
         default: false,
     },
-    "feature_allow_screen_share_only_mode": {
-        isFeature: true,
-        labsGroup: LabGroup.VoiceAndVideo,
-        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG_PRIORITISED,
-        supportedLevelsAreOrdered: true,
-        description: _td("labs|under_active_development"),
-        displayName: _td("labs|allow_screen_share_only_mode"),
-        controller: new ReloadOnChangeController(),
-        default: false,
-    },
     "feature_location_share_live": {
         isFeature: true,
         labsGroup: LabGroup.Messaging,
@@ -666,7 +687,7 @@ export const SETTINGS: Settings = {
         displayName: _td("labs|new_room_list"),
         description: _td("labs|under_active_development"),
         isFeature: true,
-        default: false,
+        default: true,
         controller: new ReloadOnChangeController(),
     },
     /**
@@ -820,7 +841,7 @@ export const SETTINGS: Settings = {
         controller: new ServerSupportUnstableFeatureController(
             "userTimezonePublish",
             defaultWatchManager,
-            [[UNSTABLE_MSC4133_EXTENDED_PROFILES]],
+            [[UNSTABLE_MSC4133_EXTENDED_PROFILES], [STABLE_MSC4133_EXTENDED_PROFILES]],
             undefined,
             _td("labs|extended_profiles_msc_support"),
         ),
@@ -1401,13 +1422,26 @@ export const SETTINGS: Settings = {
         supportedLevels: LEVELS_UI_FEATURE,
         default: true,
     },
+    [UIFeature.AllowCreatingPublicSpaces]: {
+        supportedLevels: LEVELS_UI_FEATURE,
+        default: true,
+    },
+    [UIFeature.AllowCreatingPublicRooms]: {
+        supportedLevels: LEVELS_UI_FEATURE,
+        default: true,
+    },
 
     // Electron-specific settings, they are stored by Electron and set/read over an IPC.
     // We store them over there are they are necessary to know before the renderer process launches.
     "Electron.autoLaunch": {
         supportedLevels: [SettingLevel.PLATFORM],
-        displayName: _td("settings|start_automatically"),
-        default: false,
+        displayName: _td("settings|start_automatically|label"),
+        options: [
+            { value: "enabled", label: _td("settings|start_automatically|enabled") },
+            { value: "disabled", label: _td("settings|start_automatically|disabled") },
+            { value: "minimised", label: _td("settings|start_automatically|minimised") },
+        ],
+        default: "disabled",
     },
     "Electron.warnBeforeExit": {
         supportedLevels: [SettingLevel.PLATFORM],

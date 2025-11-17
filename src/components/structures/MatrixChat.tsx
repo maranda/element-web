@@ -49,9 +49,8 @@ import { _t, _td } from "../../languageHandler";
 import SettingsStore from "../../settings/SettingsStore";
 import ThemeController from "../../settings/controllers/ThemeController";
 import { startAnyRegistrationFlow } from "../../Registration";
-import ResizeNotifier from "../../utils/ResizeNotifier";
 import AutoDiscoveryUtils from "../../utils/AutoDiscoveryUtils";
-import { makeRoomPermalink } from "../../utils/permalinks/Permalinks";
+import { calculateRoomVia, makeRoomPermalink } from "../../utils/permalinks/Permalinks";
 import ThemeWatcher, { ThemeWatcherEvent } from "../../settings/watchers/ThemeWatcher";
 import { FontWatcher } from "../../settings/watchers/FontWatcher";
 import { storeRoomAliasInCache } from "../../RoomAliasCache";
@@ -130,7 +129,6 @@ import { NotificationLevel } from "../../stores/notifications/NotificationLevel"
 import { type UserTab } from "../views/dialogs/UserTab";
 import { shouldSkipSetupEncryption } from "../../utils/crypto/shouldSkipSetupEncryption";
 import { Filter } from "../views/dialogs/spotlight/Filter";
-import { checkSessionLockFree, getSessionLock } from "../../utils/SessionLock";
 import { SessionLockStolenView } from "./auth/SessionLockStolenView";
 import { ConfirmSessionLockTheftView } from "./auth/ConfirmSessionLockTheftView";
 import { LoginSplashView } from "./auth/LoginSplashView";
@@ -141,6 +139,8 @@ import { type OpenForwardDialogPayload } from "../../dispatcher/payloads/OpenFor
 import { ShareFormat, type SharePayload } from "../../dispatcher/payloads/SharePayload";
 import Markdown from "../../Markdown";
 import { sanitizeHtmlParams } from "../../Linkify";
+import { isOnlyAdmin } from "../../utils/membership";
+import { ModuleApi } from "../../modules/Api.ts";
 
 // legacy export
 export { default as Views } from "../../Views";
@@ -176,9 +176,11 @@ interface IProps {
 interface IState {
     // the master view we are showing.
     view: Views;
-    // What the LoggedInView would be showing if visible
+    // What the LoggedInView would be showing if visible.
+    // A member of the enum for standard pages or a string for those provided by
+    // a module.
     // eslint-disable-next-line camelcase
-    page_type?: PageType;
+    page_type?: PageType | string;
     // The ID of the room we're viewing. This is either populated directly
     // in the case where we view a room by ID or by RoomView when it resolves
     // what ID an alias points at.
@@ -199,7 +201,6 @@ interface IState {
     // and disable it when there are no dialogs
     hideToSRUsers: boolean;
     syncError: Error | null;
-    resizeNotifier: ResizeNotifier;
     serverConfig?: ValidatedServerConfig;
     ready: boolean;
     threepidInvite?: IThreepidInvite;
@@ -237,6 +238,8 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
     private readonly stores: SdkContextClass;
     private loadSessionAbortController = new AbortController();
 
+    private sessionLoadStarted = false;
+
     public constructor(props: IProps) {
         super(props);
         this.stores = SdkContextClass.instance;
@@ -252,7 +255,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
             isMobileRegistration: false,
 
             syncError: null, // If the current syncing status is ERROR, the error object, otherwise null.
-            resizeNotifier: new ResizeNotifier(),
             ready: false,
         };
 
@@ -311,7 +313,8 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
     private async initSession(): Promise<void> {
         // The Rust Crypto SDK will break if two Element instances try to use the same datastore at once, so
         // make sure we are the only Element instance in town (on this browser/domain).
-        if (!(await getSessionLock(() => this.onSessionLockStolen()))) {
+        const platform = PlatformPeg.get();
+        if (platform && !(await platform.getSessionLock(() => this.onSessionLockStolen()))) {
             // we failed to get the lock. onSessionLockStolen should already have been called, so nothing left to do.
             return;
         }
@@ -456,7 +459,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         UIStore.instance.on(UI_EVENTS.Resize, this.handleResize);
 
         // For PersistentElement
-        this.state.resizeNotifier.on("middlePanelResized", this.dispatchTimelineResize);
+        this.stores.resizeNotifier.on("middlePanelResized", this.dispatchTimelineResize);
 
         RoomNotificationStateStore.instance.on(UPDATE_STATUS_INDICATOR, this.onUpdateStatusIndicator);
 
@@ -469,15 +472,21 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         this.fontWatcher.start();
 
         initSentry(SdkConfig.get("sentry"));
-
-        if (!checkSessionLockFree()) {
-            // another instance holds the lock; confirm its theft before proceeding
-            setTimeout(() => this.setState({ view: Views.CONFIRM_LOCK_THEFT }), 0);
-        } else {
-            this.startInitSession();
-        }
-
         window.addEventListener("resize", this.onWindowResized);
+
+        // Once we start loading the MatrixClient, we can't stop, even if MatrixChat gets unmounted (as it does
+        // in React's Strict Mode). So, start loading the session now, but only if this MatrixChat was not previously
+        // mounted.
+        if (!this.sessionLoadStarted) {
+            this.sessionLoadStarted = true;
+            const platform = PlatformPeg.get();
+            if (platform && !platform.checkSessionLockFree()) {
+                // another instance holds the lock; confirm its theft before proceeding
+                setTimeout(() => this.setState({ view: Views.CONFIRM_LOCK_THEFT }), 0);
+            } else {
+                this.startInitSession();
+            }
+        }
     }
 
     public componentDidUpdate(prevProps: IProps, prevState: IState): void {
@@ -502,7 +511,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         this.themeWatcher?.stop();
         this.fontWatcher?.stop();
         UIStore.destroy();
-        this.state.resizeNotifier.removeListener("middlePanelResized", this.dispatchTimelineResize);
+        this.stores.resizeNotifier.removeListener("middlePanelResized", this.dispatchTimelineResize);
         window.removeEventListener("resize", this.onWindowResized);
     }
 
@@ -819,7 +828,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                         collapseLhs: true,
                     },
                     () => {
-                        this.state.resizeNotifier.notifyLeftHandleResized();
+                        this.stores.resizeNotifier.notifyLeftHandleResized();
                     },
                 );
                 break;
@@ -829,7 +838,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                         collapseLhs: false,
                     },
                     () => {
-                        this.state.resizeNotifier.notifyLeftHandleResized();
+                        this.stores.resizeNotifier.notifyLeftHandleResized();
                     },
                 );
                 break;
@@ -1018,7 +1027,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                 presentedId = theAlias;
                 // Store display alias of the presented room in cache to speed future
                 // navigation.
-                storeRoomAliasInCache(theAlias, room.roomId);
+                storeRoomAliasInCache(theAlias, room.roomId, calculateRoomVia(room));
             }
 
             // Store this as the ID of the last room accessed. This is so that we can
@@ -1255,29 +1264,22 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
 
         const client = MatrixClientPeg.get();
         if (client && roomToLeave) {
-            const plEvent = roomToLeave.currentState.getStateEvents(EventType.RoomPowerLevels, "");
-            const plContent = plEvent ? plEvent.getContent() : {};
-            const userLevels = plContent.users || {};
-            const currentUserLevel = userLevels[client.getUserId()!];
-            const userLevelValues = Object.values(userLevels);
-            if (userLevelValues.every((x) => typeof x === "number")) {
+            // If the user is the only user with highest power level
+            if (isOnlyAdmin(roomToLeave)) {
+                const userLevelValues = roomToLeave.getJoinedMembers().map((m) => m.powerLevel);
+
                 const maxUserLevel = Math.max(...(userLevelValues as number[]));
-                // If the user is the only user with highest power level
-                if (
-                    maxUserLevel === currentUserLevel &&
-                    userLevelValues.lastIndexOf(maxUserLevel) == userLevelValues.indexOf(maxUserLevel)
-                ) {
-                    const warning =
-                        maxUserLevel >= 100
-                            ? _t("leave_room_dialog|room_leave_admin_warning")
-                            : _t("leave_room_dialog|room_leave_mod_warning");
-                    warnings.push(
-                        <strong className="warning" key="last_admin_warning">
-                            {" " /* Whitespace, otherwise the sentences get smashed together */}
-                            {warning}
-                        </strong>,
-                    );
-                }
+
+                const warning =
+                    maxUserLevel >= 100
+                        ? _t("leave_room_dialog|room_leave_admin_warning")
+                        : _t("leave_room_dialog|room_leave_mod_warning");
+                warnings.push(
+                    <strong className="warning" key="last_admin_warning">
+                        {" " /* Whitespace, otherwise the sentences get smashed together */}
+                        {warning}
+                    </strong>,
+                );
             }
         }
 
@@ -1922,8 +1924,8 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                 userId: userId,
                 subAction: params?.action,
             });
-        } else {
-            logger.info(`Ignoring showScreen for '${screen}'`);
+        } else if (ModuleApi.instance.navigation.locationRenderers.get(screen)) {
+            this.setState({ page_type: screen });
         }
     }
 
@@ -1955,7 +1957,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         }
 
         this.prevWindowWidth = width;
-        this.state.resizeNotifier.notifyWindowResized();
+        this.stores.resizeNotifier.notifyWindowResized();
     };
 
     private dispatchTimelineResize(): void {

@@ -7,9 +7,10 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { type Room } from "matrix-js-sdk/src/matrix";
-import React, { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { CallType } from "matrix-js-sdk/src/webrtc/call";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
+import type React from "react";
 import { useFeatureEnabled, useSettingValue } from "../useSettings";
 import SdkConfig from "../../SdkConfig";
 import { useEventEmitter, useEventEmitterState } from "../useEventEmitter";
@@ -18,24 +19,24 @@ import { useWidgets } from "../../utils/WidgetUtils";
 import { WidgetType } from "../../widgets/WidgetType";
 import { useCall, useConnectionState, useParticipantCount } from "../useCall";
 import { useRoomMemberCount } from "../useRoomMembers";
-import { ConnectionState, ElementCall } from "../../models/Call";
+import { ConnectionState } from "../../models/Call";
 import { placeCall } from "../../utils/room/placeCall";
 import { Container, WidgetLayoutStore } from "../../stores/widgets/WidgetLayoutStore";
 import { useRoomState } from "../useRoomState";
 import { _t } from "../../languageHandler";
 import { isManagedHybridWidget, isManagedHybridWidgetEnabled } from "../../widgets/ManagedHybrid";
 import { type IApp } from "../../stores/WidgetStore";
-import { SdkContextClass } from "../../contexts/SDKContext";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import defaultDispatcher from "../../dispatcher/dispatcher";
 import { type ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
 import { Action } from "../../dispatcher/actions";
 import { CallStore, CallStoreEvent } from "../../stores/CallStore";
 import { isVideoRoom } from "../../utils/video-rooms";
-import { useGuestAccessInformation } from "./useGuestAccessInformation";
 import { UIFeature } from "../../settings/UIFeature";
-import { BetaPill } from "../../components/views/beta/BetaCard";
 import { type InteractionName } from "../../PosthogTrackers";
+import { ElementCallMemberEventType } from "../../call-types";
+import { LocalRoom, LocalRoomState } from "../../models/LocalRoom";
+import { useScopedRoomContext } from "../../contexts/ScopedRoomContext";
 
 export enum PlatformCallType {
     ElementCall,
@@ -55,7 +56,6 @@ export const getPlatformCallTypeProps = (
             return {
                 label: _t("voip|element_call"),
                 analyticsName: "WebVoipOptionElementCall",
-                children: <BetaPill />,
             };
         case PlatformCallType.JitsiCall:
             return {
@@ -72,7 +72,6 @@ export const getPlatformCallTypeProps = (
 
 const enum State {
     NoCall,
-    NoOneHere,
     NoPermission,
     Unpinned,
     Ongoing,
@@ -85,7 +84,7 @@ const enum State {
  * @returns the call button attributes for the given room
  */
 export const useRoomCall = (
-    room: Room,
+    room: Room | LocalRoom,
 ): {
     voiceCallDisabledReason: string | null;
     voiceCallClick(evt: React.MouseEvent | undefined, selectedType: PlatformCallType): void;
@@ -99,6 +98,7 @@ export const useRoomCall = (
     showVideoCallButton: boolean;
     showVoiceCallButton: boolean;
 } => {
+    const roomViewStore = useScopedRoomContext("roomViewStore").roomViewStore;
     // settings
     const groupCallsEnabled = useFeatureEnabled("feature_group_calls");
     const widgetsFeatureEnabled = useSettingValue(UIFeature.Widgets);
@@ -125,9 +125,9 @@ export const useRoomCall = (
     const hasGroupCall = groupCall !== null;
     const hasActiveCallSession = useParticipantCount(groupCall) > 0;
     const isViewingCall = useEventEmitterState(
-        SdkContextClass.instance.roomViewStore,
+        roomViewStore,
         UPDATE_EVENT,
-        () => SdkContextClass.instance.roomViewStore.isViewingCall() || isVideoRoom(room),
+        () => roomViewStore.isViewingCall() || isVideoRoom(room),
     );
 
     // room
@@ -135,7 +135,7 @@ export const useRoomCall = (
 
     const [mayEditWidgets, mayCreateElementCalls] = useRoomState(room, () => [
         room.currentState.mayClientSendStateEvent("im.vector.modular.widgets", room.client),
-        room.currentState.mayClientSendStateEvent(ElementCall.MEMBER_EVENT_TYPE.name, room.client),
+        room.currentState.mayClientSendStateEvent(ElementCallMemberEventType.name, room.client),
     ]);
 
     // The options provided to the RoomHeader.
@@ -196,7 +196,6 @@ export const useRoomCall = (
     const connectedCalls = useEventEmitterState(CallStore.instance, CallStoreEvent.ConnectedCalls, () =>
         Array.from(CallStore.instance.connectedCalls),
     );
-    const { canInviteGuests } = useGuestAccessInformation(room);
 
     const state = useMemo((): State => {
         if (connectedCalls.find((call) => call.roomId != room.roomId)) {
@@ -208,24 +207,20 @@ export const useRoomCall = (
         if (hasLegacyCall) {
             return State.Ongoing;
         }
-        if (memberCount <= 1 && !canInviteGuests) {
-            return State.NoOneHere;
-        }
 
-        if (!mayCreateElementCalls && !mayEditWidgets) {
+        if (!callOptions.includes(PlatformCallType.LegacyCall) && !mayCreateElementCalls && !mayEditWidgets) {
             return State.NoPermission;
         }
         return State.NoCall;
     }, [
+        callOptions,
         connectedCalls,
-        canInviteGuests,
         hasGroupCall,
         hasJitsiWidget,
         hasLegacyCall,
         hasManagedHybridWidget,
         mayCreateElementCalls,
         mayEditWidgets,
-        memberCount,
         promptPinWidget,
         room.roomId,
     ]);
@@ -236,7 +231,7 @@ export const useRoomCall = (
             if (widget && promptPinWidget) {
                 WidgetLayoutStore.instance.moveToContainer(room, widget, Container.Top);
             } else {
-                placeCall(room, CallType.Voice, callPlatformType, evt?.shiftKey ?? false);
+                placeCall(room, CallType.Voice, callPlatformType, evt?.shiftKey || undefined);
             }
         },
         [promptPinWidget, room, widget],
@@ -247,7 +242,9 @@ export const useRoomCall = (
             if (widget && promptPinWidget) {
                 WidgetLayoutStore.instance.moveToContainer(room, widget, Container.Top);
             } else {
-                placeCall(room, CallType.Video, callPlatformType, evt?.shiftKey ?? false);
+                // If we have pressed shift then always skip the lobby, otherwise `undefined` will defer
+                // to the defaults of the call implementation.
+                placeCall(room, CallType.Video, callPlatformType, evt?.shiftKey || undefined);
             }
         },
         [widget, promptPinWidget, room],
@@ -264,10 +261,6 @@ export const useRoomCall = (
             voiceCallDisabledReason = _t("voip|disabled_ongoing_call");
             videoCallDisabledReason = _t("voip|disabled_ongoing_call");
             break;
-        case State.NoOneHere:
-            voiceCallDisabledReason = _t("voip|disabled_no_one_here");
-            videoCallDisabledReason = _t("voip|disabled_no_one_here");
-            break;
         case State.Unpinned:
         case State.NotJoined:
         case State.NoCall:
@@ -283,11 +276,16 @@ export const useRoomCall = (
         });
     }, [isViewingCall, room.roomId]);
 
+    const roomDoesNotExist = room instanceof LocalRoom && room.state !== LocalRoomState.CREATED;
+
     // We hide the voice call button if it'd have the same effect as the video call button
     let hideVoiceCallButton = isManagedHybridWidgetEnabled(room) || !callOptions.includes(PlatformCallType.LegacyCall);
     let hideVideoCallButton = false;
-    // We hide both buttons if they require widgets but widgets are disabled, or if the Voip feature is disabled.
-    if ((memberCount > 2 && !widgetsFeatureEnabled) || !voipFeatureEnabled) {
+    // We hide both buttons if:
+    // - they require widgets but widgets are disabled
+    // - if the Voip feature is disabled.
+    // - The room is not created yet (rendering "send first message view")
+    if ((memberCount > 2 && !widgetsFeatureEnabled) || !voipFeatureEnabled || roomDoesNotExist) {
         hideVoiceCallButton = true;
         hideVideoCallButton = true;
     }
